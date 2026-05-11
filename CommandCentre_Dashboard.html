@@ -1,0 +1,1778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Solutions Delivery — Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space-black: #0a0e1a;
+    --space-deep: #050811;
+    --space-mid: #131826;
+    --space-elev: #1c2235;
+    --safety-blue: #1b4dff;
+    --safety-blue-soft: #6e8bff;
+    --code-green: #00d67a;
+    --code-green-soft: #5cf0ad;
+    --amber: #ffb020;
+    --red: #ff3d5a;
+    --white: #ffffff;
+    --grey-100: #e8eaf0;
+    --grey-300: #a7adbe;
+    --grey-500: #5d6478;
+    --grey-700: #2f3548;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.16);
+    --glow-blue: 0 0 28px rgba(27,77,255,0.35);
+    --glow-green: 0 0 28px rgba(0,214,122,0.35);
+    --glow-red: 0 0 28px rgba(255,61,90,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--space-deep);
+    color: var(--white);
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(27,77,255,0.18) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 100%, rgba(0,214,122,0.10) 0%, transparent 45%),
+      var(--space-deep);
+    background-attachment: fixed;
+  }
+
+  /* faint grid */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 56px 1fr 44px;
+    padding: 18px;
+    gap: 14px;
+  }
+
+  /* ================ TOP BAR ================ */
+  .topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 0 22px;
+    background: linear-gradient(90deg, var(--space-black) 0%, var(--space-mid) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(27,77,255,0.15) inset;
+  }
+
+  .top-centre {
+    display: flex; align-items: center; justify-content: flex-start;
+    gap: 0;
+  }
+  .opus-logo {
+    display: flex; align-items: center;
+    color: var(--white);
+  }
+  .opus-logo:not(:empty) {
+    margin-right: 18px;
+    padding-right: 18px;
+    border-right: 1px solid var(--border-strong);
+  }
+  .opus-logo img, .opus-logo svg { height: 28px; width: auto; display: block; }
+  .top-title {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 400; font-size: 15px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--grey-300);
+  }
+  .top-title strong {
+    color: var(--white);
+    font-weight: 700;
+    margin-left: 8px;
+  }
+
+  .top-meta {
+    display: flex; align-items: center; gap: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--grey-100);
+  }
+  .top-meta .live {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--code-green); font-weight: 600;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--code-green);
+    box-shadow: var(--glow-green);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .live.stale .live-dot { background: var(--amber); box-shadow: 0 0 12px rgba(255,176,32,0.6); }
+  .live.stale { color: var(--amber); }
+  .live.error .live-dot { background: var(--red); box-shadow: var(--glow-red); }
+  .live.error { color: var(--red); }
+
+  /* ================ MAIN GRID ================ */
+  .main {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  /* ================ ROTATING VIEWS ================ */
+  .rotator {
+    position: relative;
+    min-height: 0;
+  }
+  .view {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    gap: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease;
+    min-height: 0;
+  }
+  .view.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  /* Per-view grid layouts */
+  .view-delivery   { grid-template-columns: 1.5fr 1fr; }
+  .view-commercial { grid-template-columns: 2fr 1fr; }
+  .view-team       { grid-template-columns: 1fr 1fr; }
+
+  /* View dot indicators */
+  .view-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 8px;
+  }
+  .view-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border-strong);
+    transition: background 0.4s, width 0.4s;
+  }
+  .view-dot.active {
+    background: var(--code-green);
+    box-shadow: 0 0 8px rgba(0,214,122,0.55);
+    width: 24px;
+    border-radius: 3px;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(28,34,53,0.85) 0%, rgba(19,24,38,0.85) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    backdrop-filter: blur(8px);
+    display: flex; flex-direction: column;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel::before {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--safety-blue) 0%, var(--code-green) 100%);
+    opacity: 0.85;
+  }
+
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600; font-size: 11px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--grey-300);
+  }
+  .panel-title strong { color: var(--white); }
+  .panel-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--grey-300);
+  }
+  .panel-meta strong.green { color: var(--code-green); }
+  .panel-meta strong.amber { color: var(--amber); }
+  .panel-meta strong.red { color: var(--red); }
+  .panel-meta strong.sar { color: var(--safety-blue-soft); }
+
+  /* ================ ENGAGEMENTS ================ */
+  .eng-list {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    padding-right: 4px;
+    flex: 1;
+    min-height: 0;
+  }
+  .eng-list::-webkit-scrollbar { width: 6px; }
+  .eng-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  .eng-header {
+    display: grid;
+    grid-template-columns: 14px 1fr 40px 40px 75px 40px;
+    gap: 18px;
+    padding: 6px 18px 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eng-h-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--grey-500);
+  }
+  .eng-h-center { text-align: center; }
+  .badge-placeholder { display: inline-block; }
+
+  /* ================ AUTO-SCROLL LOOP ================ */
+  .scroll-track {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .scroll-track.eng-track > * + * { margin-top: 8px; }
+  .scroll-track.risk-track > * + * { margin-top: 6px; }
+  .scroll-track.pricing-track > * + * { margin-top: 8px; }
+  .scroll-host.scrolling .scroll-track {
+    animation: scroll-loop var(--scroll-duration, 40s) linear infinite;
+  }
+  @keyframes scroll-loop {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  /* Gap between original and duplicated content to match list gap */
+  .scroll-spacer-eng     { height: 8px; flex-shrink: 0; }
+  .scroll-spacer-risk    { height: 6px; flex-shrink: 0; }
+  .scroll-spacer-pricing { height: 8px; flex-shrink: 0; }
+
+  .eng-row {
+    display: grid;
+    grid-template-columns: 14px 1fr 40px 40px 75px 40px;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 18px;
+    background: rgba(10,14,26,0.45);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+  .eng-row:hover { border-color: var(--border-strong); }
+  .eng-row.confidential .eng-client { filter: blur(0); }
+
+  .rag-pill {
+    width: 8px; height: 40px; border-radius: 2px;
+  }
+  .rag-pill.green { background: var(--code-green); box-shadow: 0 0 12px rgba(0,214,122,0.6); }
+  .rag-pill.amber { background: var(--amber); box-shadow: 0 0 12px rgba(255,176,32,0.55); }
+  .rag-pill.red { background: var(--red); box-shadow: 0 0 12px rgba(255,61,90,0.6); }
+
+  .eng-info { min-width: 0; }
+  .eng-line1 {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .eng-client {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600; font-size: 16px;
+    color: var(--white);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .eng-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--grey-500);
+  }
+  .eng-prog {
+    font-size: 12px; color: var(--grey-300);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    justify-self: center;
+  }
+  .badge-sar {
+    background: rgba(27,77,255,0.18);
+    color: var(--safety-blue-soft);
+    border: 1px solid rgba(27,77,255,0.45);
+  }
+  .badge-cr {
+    background: rgba(255,255,255,0.05);
+    color: var(--grey-100);
+    border: 1px solid var(--border);
+  }
+  .badge-cr.has { color: var(--code-green-soft); border-color: rgba(0,214,122,0.3); }
+
+  .eng-week {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--grey-300);
+    text-align: center;
+  }
+  .eng-week strong { color: var(--white); font-size: 13px; }
+
+  .eng-sat {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600; font-size: 16px;
+    text-align: center;
+  }
+  .eng-sat.green { color: var(--code-green); }
+  .eng-sat.amber { color: var(--amber); }
+  .eng-sat.red { color: var(--red); }
+  .eng-sat.none { color: var(--grey-500); font-weight: 400; }
+
+  .cell-mark, .cell-num, .cell-blank {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600; font-size: 16px;
+    text-align: center;
+    justify-self: center;
+  }
+  .cell-mark-sar { color: var(--safety-blue-soft); }
+  .cell-num { color: var(--grey-300); }
+  .cell-num.has { color: var(--code-green-soft); }
+  .cell-blank { color: var(--grey-500); font-weight: 400; }
+
+  /* ================ HEADLINE STATS ================ */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    overflow: visible;
+  }
+  .stats::before { display: none; }
+
+  .stat {
+    background: linear-gradient(180deg, rgba(28,34,53,0.85) 0%, rgba(19,24,38,0.85) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--grey-300);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700; font-size: 28px;
+    line-height: 1;
+    color: var(--white);
+  }
+  .stat-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--grey-300);
+    margin-top: 6px;
+  }
+  .stat-sub.green { color: var(--code-green); }
+  .stat-sub.red { color: var(--red); }
+
+  /* ================ COMMERCIAL ================ */
+  .commercial {
+    overflow: hidden;
+  }
+  .comm-section { margin-bottom: 16px; display: flex; flex-direction: column; min-height: 0; }
+  .comm-section:last-child { margin-bottom: 0; }
+  .comm-section-grow {
+    flex: 1;
+    min-height: 0;
+  }
+  .comm-section-grow .pricing-list {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 4px;
+  }
+  .comm-section-grow .pricing-list::-webkit-scrollbar { width: 6px; }
+  .comm-section-grow .pricing-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .comm-head {
+    font-family: 'Prompt', sans-serif;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--safety-blue-soft);
+    margin-bottom: 10px;
+  }
+
+  .pricing-list { display: flex; flex-direction: column; gap: 8px; }
+  .pricing-row { font-size: 12px; }
+  .pricing-row-head {
+    display: flex; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .pricing-client {
+    color: var(--white); font-weight: 600;
+    font-size: 11px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .pricing-discount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--amber);
+  }
+  .pricing-discount.heavy { color: var(--red); }
+  .pricing-discount.low { color: var(--code-green); }
+  .pricing-bars {
+    position: relative;
+    height: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .pricing-list-bar {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: rgba(255,255,255,0.10);
+  }
+  .pricing-sold-bar {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: linear-gradient(90deg, var(--code-green) 0%, var(--code-green-soft) 100%);
+  }
+  .pricing-sold-bar.green  { background: linear-gradient(90deg, var(--code-green) 0%, var(--code-green-soft) 100%); }
+  .pricing-sold-bar.amber  { background: linear-gradient(90deg, var(--amber) 0%, #ffd27a 100%); }
+  .pricing-sold-bar.red    { background: linear-gradient(90deg, var(--red) 0%, #ff7a8e 100%); }
+  .pricing-row.belowfloor .pricing-sold-bar {
+    background: linear-gradient(90deg, var(--red) 0%, #ff7a8e 100%);
+  }
+  .pricing-row.belowfloor .pricing-client::after {
+    content: " ⚠ heavy slippage";
+    color: var(--red);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .early-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--grey-300);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .pricing-footnote {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--grey-500);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+
+  .gm-stack {
+    display: flex; flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    justify-content: center;
+  }
+  .gm-card-lg {
+    background: rgba(10,14,26,0.45);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+  .gm-card-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey-300);
+    margin-bottom: 4px;
+  }
+  .gm-card-val-lg {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--white);
+    margin-top: 6px;
+  }
+  .gm-card-val-lg.green { color: var(--code-green); }
+  .gm-card-val-lg.amber { color: var(--amber); }
+  .gm-card-val-lg.red   { color: var(--red); }
+  .gm-delta {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--amber);
+    padding: 12px;
+    background: rgba(255,176,32,0.08);
+    border: 1px solid rgba(255,176,32,0.2);
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* ================ UTILISATION ================ */
+  .util-list { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; padding-right: 4px; }
+  .util-list::-webkit-scrollbar { width: 6px; }
+  .util-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .util-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 36px;
+    align-items: center; gap: 8px;
+    font-size: 11px;
+  }
+  .util-name { color: var(--grey-100); }
+  .util-bar {
+    height: 6px; border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    overflow: hidden;
+    position: relative;
+  }
+  .util-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--code-green) 0%, var(--code-green-soft) 100%);
+  }
+  .util-fill.healthy { background: linear-gradient(90deg, var(--code-green) 0%, var(--code-green-soft) 100%); }
+  .util-fill.watch   { background: linear-gradient(90deg, var(--amber) 0%, #ffd27a 100%); }
+  .util-fill.low     { background: linear-gradient(90deg, var(--red) 0%, #ff7a8e 100%); }
+  .util-fill.over    { background: linear-gradient(90deg, var(--amber) 0%, var(--red) 100%); }
+  .util-target {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 1px;
+    background: var(--white);
+    opacity: 0.4;
+  }
+  .util-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--grey-100);
+    text-align: right;
+  }
+
+  /* ================ HIRING ================ */
+  .hiring-list {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .hiring-list::-webkit-scrollbar { width: 6px; }
+  .hiring-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .hiring-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: rgba(10,14,26,0.45);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .hiring-role {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--white);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hiring-stage {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .hiring-stage.open        { background: rgba(110,139,255,0.12); color: var(--safety-blue-soft); }
+  .hiring-stage.screening   { background: rgba(110,139,255,0.18); color: var(--safety-blue-soft); }
+  .hiring-stage.interviewing{ background: rgba(255,176,32,0.12); color: var(--amber); }
+  .hiring-stage.offer       { background: rgba(0,214,122,0.15); color: var(--code-green); }
+  .hiring-stage.hired       { background: rgba(0,214,122,0.25); color: var(--code-green); }
+  .hiring-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--grey-300);
+    text-align: right;
+    min-width: 50px;
+  }
+  .hiring-meta strong { color: var(--white); font-size: 13px; }
+  .hiring-meta-label {
+    font-size: 9px;
+    color: var(--grey-500);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .risks-panel { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .risk-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+  .risk-list::-webkit-scrollbar { width: 5px; }
+  .risk-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .risk-row {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(10,14,26,0.45);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    align-items: center;
+  }
+  .risk-pill {
+    width: 4px; height: 100%; min-height: 24px; border-radius: 2px;
+  }
+  .risk-pill.issues { background: var(--red); box-shadow: 0 0 8px rgba(255,61,90,0.7); }
+  .risk-pill.risks  { background: var(--amber); box-shadow: 0 0 6px rgba(255,176,32,0.45); }
+  .risk-info { min-width: 0; }
+  .risk-desc {
+    font-size: 11px; color: var(--white);
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .risk-eng {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--grey-500);
+    margin-top: 2px;
+  }
+  .risk-sev {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border-radius: 3px;
+  }
+  .risk-sev.issues { background: rgba(255,61,90,0.15); color: var(--red); }
+  .risk-sev.risks  { background: rgba(255,176,32,0.12); color: var(--amber); }
+
+  .wins-panel { min-height: 100px; overflow: hidden; }
+  .win-rotator {
+    position: relative;
+    height: 70px;
+  }
+  .win-card {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  }
+  .win-card.active { opacity: 1; }
+  .win-quote {
+    font-family: 'Prompt', sans-serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.35;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .win-attr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--code-green-soft);
+  }
+
+  /* ================ NOW STRIP ================ */
+  .nowstrip {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: 0 22px;
+    background: linear-gradient(90deg, var(--space-black) 0%, var(--space-mid) 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .now-time {
+    color: var(--code-green);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .now-time .week { color: var(--grey-300); margin-left: 12px; font-weight: 400; }
+  .now-marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--grey-100);
+    mask-image: linear-gradient(90deg, transparent 0, black 5%, black 95%, transparent 100%);
+  }
+  .marquee-track {
+    display: inline-block;
+    animation: marquee 180s linear infinite;
+    padding-left: 100%;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+  .marquee-item {
+    margin-right: 56px;
+  }
+  .marquee-item .tag {
+    color: var(--safety-blue-soft);
+    margin-right: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .marquee-item .green-tag { color: var(--code-green); }
+  .marquee-item .bv-tag    { color: var(--safety-blue-soft); }
+
+  .footer-meta {
+    font-size: 10px;
+    color: var(--grey-500);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <div class="top-centre">
+      <!-- Empty Opus logo slot — replace contents with <img src="..."/> or inline SVG to use the real logo -->
+      <div class="opus-logo" id="opus-logo"></div>
+      <div class="top-title">Solutions Delivery <strong>Command Centre</strong></div>
+    </div>
+    <div class="top-meta">
+      <span id="topdate"></span>
+      <span class="live" id="datastatus" title="Data fetch status">
+        <span class="live-dot" id="livedot"></span>
+        <span id="datastatus-text">LIVE</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ============ MAIN GRID ============ -->
+  <div class="main">
+
+    <!-- Headline stats (always visible) -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Revenue Under Mgmt</div>
+        <div class="stat-value" id="stat-rum">—</div>
+        <div class="stat-sub" id="stat-rum-sub">delivered to date</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Portfolio GM</div>
+        <div class="stat-value" id="stat-gm">—</div>
+        <div class="stat-sub" id="stat-gm-sub"><span id="stat-gm-sub-target">vs target 55%</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Portfolio CSAT</div>
+        <div class="stat-value" id="stat-csat">—</div>
+        <div class="stat-sub" id="stat-csat-sub">across active engagements</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Productive Utilisation</div>
+        <div class="stat-value" id="stat-util">—</div>
+        <div class="stat-sub" id="stat-util-sub">team avg vs target</div>
+      </div>
+    </div>
+
+    <!-- Rotating views container -->
+    <div class="rotator">
+
+      <!-- ====== VIEW 01: DELIVERY (Engagements + Risks) ====== -->
+      <section class="view view-delivery active" data-view="delivery">
+        <div class="panel engagements">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Engagements</strong></div>
+            <div class="panel-meta" id="eng-summary"></div>
+          </div>
+          <div class="eng-header">
+            <div></div>
+            <div class="eng-h-label">Project Name / Client</div>
+            <div class="eng-h-label eng-h-center">SAR</div>
+            <div class="eng-h-label eng-h-center">CRs</div>
+            <div class="eng-h-label eng-h-center">Progress</div>
+            <div class="eng-h-label eng-h-center">CSAT</div>
+          </div>
+          <div class="eng-list" id="eng-list"></div>
+        </div>
+
+        <div class="panel risks-panel">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Watch List</strong></div>
+            <div class="panel-meta" id="risks-summary"></div>
+          </div>
+          <div class="risk-list" id="risk-list"></div>
+        </div>
+      </section>
+
+      <!-- ====== VIEW 02: COMMERCIAL ====== -->
+      <section class="view view-commercial" data-view="commercial">
+        <div class="panel commercial">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Commercial</strong></div>
+            <div class="panel-meta">PRICING · MARGIN</div>
+          </div>
+          <div class="comm-section comm-section-grow">
+            <div class="comm-head">Margin slippage · sold GM% vs actual GM%</div>
+            <div class="pricing-list" id="pricing"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Portfolio GM% impact</strong></div>
+            <div class="panel-meta">SOLD vs ACTUAL</div>
+          </div>
+          <div class="gm-stack">
+            <div class="gm-card-lg">
+              <div class="gm-card-label">GM at sold</div>
+              <div class="gm-card-val-lg green" id="gm-list">—</div>
+            </div>
+            <div class="gm-card-lg">
+              <div class="gm-card-label">GM actual</div>
+              <div class="gm-card-val-lg amber" id="gm-sold">—</div>
+            </div>
+            <div class="gm-delta" id="gm-delta">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== VIEW 03: TEAM (Utilisation + Hiring) ====== -->
+      <section class="view view-team" data-view="team">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Utilisation</strong></div>
+            <div class="panel-meta">TARGET <strong class="green" id="util-target-label">75%</strong></div>
+          </div>
+          <div class="util-list" id="util-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><strong>Hiring</strong></div>
+            <div class="panel-meta" id="hiring-summary"></div>
+          </div>
+          <div class="hiring-list" id="hiring-list"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- View dots indicator -->
+    <div class="view-dots">
+      <span class="view-dot active" data-dot="delivery"></span>
+      <span class="view-dot" data-dot="commercial"></span>
+      <span class="view-dot" data-dot="team"></span>
+    </div>
+
+  </div>
+
+  <!-- ============ NOW STRIP ============ -->
+  <div class="nowstrip">
+    <div class="now-time">
+      <span id="clock">--:--:--</span>
+      <span class="week" id="weeknum"></span>
+    </div>
+    <div class="now-marquee">
+      <div class="marquee-track" id="marquee"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION — paste your published Google Sheet CSV URLs here
+// ============================================================
+// HOW TO GET THESE:
+//   1. Open the Google Sheet
+//   2. File → Share → Publish to web
+//   3. In the dialog, choose: <Tab name>  +  Comma-separated values (.csv)
+//   4. Click "Publish" — copy the URL it gives you
+//   5. Repeat for each tab below
+//   6. Tick "Automatically republish when changes are made"
+//
+// While URLs are blank (""), the dashboard uses the dummy data baked in below,
+// so you can preview the layout offline.
+// ============================================================
+const SHEET_URLS = {
+  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=432388555&single=true",  // Engagements tab CSV URL
+  satisfaction: "",  // Satisfaction History tab CSV URL
+  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=376784636&single=true",  // Risks tab CSV URL
+  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=1663914395&single=true",  // Pipeline tab CSV URL
+  quotes:       "",  // Quotes tab CSV URL
+  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=469293141&single=true",  // Team tab CSV URL
+  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=1040895288&single=true",  // Hiring tab CSV URL
+  wins:         "",  // Wins tab CSV URL
+  crs:          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=473917190&single=true",  // CRs tab CSV URL
+  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=173671514&single=true",  // Config tab CSV URL
+};
+
+// ============ FALLBACK DUMMY DATA (used in test mode) ============
+const DUMMY_DATA = {
+  engagements: [
+    {id:"WAY-2026-Q2", client:"Wayne Industries", prog:"Operational Excellence Programme", status:"Active", startDate:"2026-04-06", endDate:"2026-08-31", weeks:21, rag:"Green", sar:false, msPlanned:15, msDone:3, sat:7, contract:920000, list:980000, delivered:180000, gmTarget:0.60, gmActual:0.61, pm:"Marcus", confidential:false, crCount:1, crValue:60000, currentWeek:5},
+    {id:"GLX-2026-Q1", client:"Globex Energy", prog:"ERP Migration Discovery", status:"Active", startDate:"2026-03-23", endDate:"2026-06-15", weeks:12, rag:"Green", sar:false, msPlanned:9, msDone:5, sat:7, contract:680000, list:720000, delivered:420000, gmTarget:0.56, gmActual:0.58, pm:"Priya", confidential:false, crCount:1, crValue:30000, currentWeek:7},
+    {id:"SAL-2026-Q1", client:"Salama", prog:"Business Process Discovery", status:"Active", startDate:"2026-03-02", endDate:"2026-05-04", weeks:9, rag:"Green", sar:false, msPlanned:12, msDone:7, sat:6, contract:450000, list:500000, delivered:280000, gmTarget:0.55, gmActual:0.52, pm:"Ash", confidential:false, crCount:3, crValue:73000, currentWeek:10},
+    {id:"STK-2026-Q2", client:"Stark Holdings", prog:"Supply Chain Discovery", status:"Active", startDate:"2026-04-27", endDate:"2026-07-06", weeks:10, rag:"Green", sar:false, msPlanned:10, msDone:1, sat:null, contract:410000, list:440000, delivered:40000, gmTarget:0.57, gmActual:0.55, pm:"Priya", confidential:false, crCount:0, crValue:0, currentWeek:2},
+    {id:"ACME-2026-Q2", client:"Acme Holdings", prog:"Process Automation Pilot", status:"Active", startDate:"2026-04-13", endDate:"2026-07-13", weeks:13, rag:"Amber", sar:true, msPlanned:8, msDone:2, sat:4, contract:280000, list:320000, delivered:90000, gmTarget:0.58, gmActual:0.49, pm:"Priya", confidential:false, crCount:1, crValue:0, currentWeek:4},
+    {id:"INT-2026-Q1", client:"Initech", prog:"Finance Ops Mapping", status:"Active", startDate:"2026-01-19", endDate:"2026-04-13", weeks:12, rag:"Amber", sar:true, msPlanned:6, msDone:5, sat:5, contract:310000, list:340000, delivered:290000, gmTarget:0.55, gmActual:0.50, pm:"Ash", confidential:false, crCount:1, crValue:22000, currentWeek:16},
+    {id:"TRL-2026-Q1", client:"Trillian Logistics", prog:"Warehouse Ops Mapping", status:"Active", startDate:"2026-03-16", endDate:"2026-06-08", weeks:12, rag:"Amber", sar:false, msPlanned:8, msDone:4, sat:5, contract:290000, list:310000, delivered:160000, gmTarget:0.56, gmActual:0.52, pm:"Ash", confidential:false, crCount:1, crValue:0, currentWeek:8},
+    {id:"NRT-2026-Q1", client:"Northern Trust Co.", prog:"Risk Ops Discovery", status:"Active", startDate:"2026-02-09", endDate:"2026-04-20", weeks:10, rag:"Red", sar:false, msPlanned:10, msDone:5, sat:3, contract:520000, list:560000, delivered:320000, gmTarget:0.55, gmActual:0.41, pm:"Ash", confidential:true, crCount:2, crValue:80000, currentWeek:13},
+    {id:"UMB-2026-Q1", client:"Umbrella Pharma", prog:"Compliance Process Audit", status:"Active", startDate:"2026-02-23", endDate:"2026-05-25", weeks:13, rag:"Red", sar:true, msPlanned:8, msDone:4, sat:2, contract:360000, list:400000, delivered:200000, gmTarget:0.55, gmActual:0.38, pm:"Marcus", confidential:true, crCount:3, crValue:95000, currentWeek:11},
+  ],
+  pipeline: [
+    {id:"OPP-301", client:"Cyberdyne Systems",  stage:"Business Validation", value:420000, prob:0.30, closeDate:"2026-08-15", owner:"Ash"},
+    {id:"OPP-302", client:"Tyrell Corp",        stage:"Business Validation", value:680000, prob:0.30, closeDate:"2026-09-10", owner:"Marcus"},
+    {id:"OPP-303", client:"Soylent Industries", stage:"Business Validation", value:310000, prob:0.30, closeDate:"2026-08-30", owner:"Priya"},
+    {id:"OPP-304", client:"Massive Dynamic",    stage:"Business Validation", value:890000, prob:0.55, closeDate:"2026-06-30", owner:"Ash"},
+    {id:"OPP-305", client:"Oscorp",             stage:"Business Validation", value:540000, prob:0.55, closeDate:"2026-07-15", owner:"Marcus"},
+    {id:"OPP-306", client:"Pied Piper",         stage:"Business Validation", value:290000, prob:0.55, closeDate:"2026-06-25", owner:"Priya"},
+    {id:"OPP-307", client:"Hooli",              stage:"Committed",           value:720000, prob:0.95, closeDate:"2026-05-30", owner:"Ash"},
+    {id:"OPP-308", client:"Vandelay Industries",stage:"Committed",           value:380000, prob:0.95, closeDate:"2026-06-05", owner:"Marcus"},
+  ],
+  quotes: [
+    {client:"Wayne Industries", list:980000, sold:920000, gmList:0.64, gmSold:0.61, status:"Won", below:false},
+    {client:"Hooli", list:780000, sold:720000, gmList:0.63, gmSold:0.55, status:"Won", below:false},
+    {client:"Globex Energy", list:720000, sold:680000, gmList:0.62, gmSold:0.58, status:"Won", below:false},
+    {client:"Northern Trust Co.", list:560000, sold:520000, gmList:0.55, gmSold:0.41, status:"Won", below:true},
+    {client:"Krameri Group", list:520000, sold:480000, gmList:0.61, gmSold:0.59, status:"Won", below:false},
+    {client:"Salama", list:500000, sold:450000, gmList:0.62, gmSold:0.55, status:"Won", below:false},
+    {client:"Stark Holdings", list:440000, sold:410000, gmList:0.60, gmSold:0.55, status:"Won", below:false},
+    {client:"Umbrella Pharma", list:400000, sold:360000, gmList:0.58, gmSold:0.38, status:"Won", below:true},
+    {client:"Vandelay Industries", list:400000, sold:380000, gmList:0.61, gmSold:0.56, status:"Won", below:false},
+    {client:"Initech", list:340000, sold:310000, gmList:0.58, gmSold:0.50, status:"Won", below:false},
+    {client:"Acme Holdings", list:320000, sold:280000, gmList:0.60, gmSold:0.49, status:"Won", below:false},
+    {client:"Trillian Logistics", list:310000, sold:290000, gmList:0.59, gmSold:0.52, status:"Won", below:false},
+  ],
+  team: [
+    {name:"Faisal", util:0.98},
+    {name:"Sara",   util:0.94},
+    {name:"Marcus", util:0.92},
+    {name:"Layla",  util:0.88},
+    {name:"Nadia",  util:0.86},
+    {name:"Priya",  util:0.83},
+    {name:"Maya",   util:0.81},
+    {name:"Karim",  util:0.78},
+    {name:"Ash",    util:0.76},
+    {name:"Omar",   util:0.72},
+    {name:"Daniel", util:0.68},
+    {name:"Yara",   util:0.54},
+  ],
+  risks: [
+    {desc:"Regulatory scope expansion threatens margin on Umbrella audit", eng:"UMB-2026-Q1", type:"Issues"},
+    {desc:"Client decision-making cycle delaying milestones", eng:"NRT-2026-Q1", type:"Issues"},
+    {desc:"Audit findings may trigger CR-driven rework", eng:"UMB-2026-Q1", type:"Issues"},
+    {desc:"Scope ambiguity around legacy ERP integration", eng:"ACME-2026-Q2", type:"Issues"},
+    {desc:"CFO transition leaving sponsor gap", eng:"INT-2026-Q1", type:"Issues"},
+    {desc:"Replan timeline at risk if exec sign-off slips", eng:"NRT-2026-Q1", type:"Issues"},
+    {desc:"Two dept leads on leave, interview backlog growing", eng:"TRL-2026-Q1", type:"Risks"},
+    {desc:"Late provision of process documentation", eng:"ACME-2026-Q2", type:"Risks"},
+    {desc:"Stream 4 resourcing not yet confirmed", eng:"WAY-2026-Q2", type:"Risks"},
+    {desc:"Dept 4 SME availability limited next 2 weeks", eng:"SAL-2026-Q1", type:"Risks"},
+    {desc:"Data access controls slowing process mapping", eng:"SAL-2026-Q1", type:"Risks"},
+    {desc:"Travel disruption could affect dept 4 onsite", eng:"GLX-2026-Q1", type:"Risks"},
+  ],
+  wins: [
+    {quote:"Best-structured discovery I've seen in 15 years of consulting engagements.", attr:"Globex Energy · sponsor"},
+    {quote:"The discovery model has surfaced things we'd never have found in interviews alone.", attr:"Salama · programme liaison"},
+    {quote:"Best-run kickoff we've had in years.", attr:"Wayne Industries · COO"},
+    {quote:"Five workstreams launched on schedule — full Wayne programme now in flight.", attr:"Milestone · 03 May"},
+    {quote:"Salama Department 3 process documentation signed off — three weeks ahead of plan.", attr:"Milestone · 02 May"},
+    {quote:"Hooli contracted for a 14-week operational discovery programme.", attr:"Deal won · 28 Apr"},
+  ],
+  hiring: [
+    {role:"Senior Delivery Consultant", stage:"Interviewing", candidates:4, dateOpened:"2026-03-10"},
+    {role:"Solutions Engineer",         stage:"Screening",   candidates:7, dateOpened:"2026-04-15"},
+    {role:"Programme Manager",          stage:"Open",        candidates:2, dateOpened:"2026-04-28"},
+    {role:"Junior Consultant",          stage:"Offer",       candidates:1, dateOpened:"2026-02-22"},
+  ],
+  satisfaction: {
+    // engagement ID → array of scores in chronological order (oldest first)
+    "WAY-2026-Q2": [6, 7],
+    "GLX-2026-Q1": [6, 6, 6, 7, 7, 7, 7],
+    "SAL-2026-Q1": [7, 7, 7, 7, 6, 6, 6, 6, 6, 6],
+    "ACME-2026-Q2": [5, 5, 4, 4],
+    "INT-2026-Q1": [6, 6, 7, 7, 6, 6, 5, 5, 5],
+    "TRL-2026-Q1": [6, 6, 6, 5, 5, 5, 5, 5],
+    "NRT-2026-Q1": [6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 3],
+    "UMB-2026-Q1": [6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 2],
+    "STK-2026-Q2": [], // too new
+    "KRM-2025-Q4": [6, 6, 7, 7],
+  }
+};
+
+// Live state — mutated by fetchAll() and read by renderers
+let DATA = JSON.parse(JSON.stringify(DUMMY_DATA));
+let CONFIG = { refreshSeconds: 60, gmTarget: 0.55, utilTarget: 0.75, satAmber: 4, satRed: 3, guestMode: false };
+
+// ============ CSV PARSER ============
+// Handles quoted fields, embedded commas, and escaped quotes ("")
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false, i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i+1] === '"') { field += '"'; i += 2; continue; }
+      if (c === '"') { inQuotes = false; i++; continue; }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ',') { row.push(field); field = ''; i++; continue; }
+    if (c === '\r') { i++; continue; }
+    if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+    field += c; i++;
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  // Drop trailing empty rows
+  while (rows.length && rows[rows.length-1].every(c => c === '')) rows.pop();
+  if (!rows.length) return [];
+  // First row = headers, rest = objects keyed by header
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => {
+    const o = {};
+    headers.forEach((h, idx) => { o[h] = (r[idx] ?? '').trim(); });
+    return o;
+  });
+}
+
+const toNum = v => {
+  if (v == null || v === '') return null;
+  // Strip currency, commas, percent
+  const cleaned = String(v).replace(/[^\d.\-]/g, '');
+  if (cleaned === '' || cleaned === '-') return null;
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? null : n;
+};
+const toPct = v => {
+  if (v == null || v === '') return null;
+  const s = String(v).trim();
+  if (s.endsWith('%')) { const n = parseFloat(s); return isNaN(n) ? null : n / 100; }
+  const n = parseFloat(s);
+  if (isNaN(n)) return null;
+  // Heuristic: values <= 1 already a fraction; values > 1 likely a percent figure
+  return n <= 1 ? n : n / 100;
+};
+const toBool = v => {
+  if (typeof v === 'boolean') return v;
+  if (v == null) return false;
+  const s = String(v).trim().toUpperCase();
+  return s === 'TRUE' || s === 'YES' || s === '1';
+};
+const weeksBetween = (start, end) => {
+  if (!start || !end) return null;
+  const s = new Date(start), e = new Date(end);
+  if (isNaN(s) || isNaN(e)) return null;
+  return Math.max(1, Math.ceil((e - s) / (7 * 86400000)));
+};
+const weeksSince = start => {
+  if (!start) return null;
+  const s = new Date(start);
+  if (isNaN(s)) return null;
+  return Math.max(1, Math.floor((Date.now() - s) / (7 * 86400000)) + 1);
+};
+
+// ============ MAPPERS — sheet rows → DATA shape ============
+function mapEngagements(rows) {
+  return rows.filter(r => r['Engagement ID']).map(r => {
+    const start = r['Start date'], end = r['End date'];
+    return {
+      id: r['Engagement ID'],
+      client: r['Client name'],
+      prog: r['Programme name'],
+      status: r['Status'],
+      startDate: start, endDate: end,
+      weeks: weeksBetween(start, end),
+      currentWeek: weeksSince(start),
+      rag: r['RAG'] || 'Green',
+      sar: toBool(r['SAR']),
+      msPlanned: toNum(r['Milestones planned']),
+      msDone: toNum(r['Milestones achieved']),
+      sat: toNum(r['Satisfaction score (1-7)']),
+      contract: toNum(r['Contract value']) || 0,
+      list: toNum(r['List price']) || 0,
+      delivered: toNum(r['Delivered to date']) || 0,
+      gmTarget: toPct(r['GM target %']) || 0,
+      gmActual: toPct(r['GM actual %']) || 0,
+      pm: r['Lead PM'] || '',
+      confidential: toBool(r['Confidential']),
+      crCount: toNum(r['CR count']) || 0,
+      crValue: toNum(r['CR value to date']) || 0,
+    };
+  });
+}
+function mapSatisfaction(rows) {
+  // Returns { engagementId: [score1, score2, ...] } in chronological order
+  const byEng = {};
+  rows
+    .filter(r => r['Engagement ID'] && r['Score (1-7)'])
+    .forEach(r => {
+      const id = r['Engagement ID'];
+      const score = toNum(r['Score (1-7)']);
+      const dateStr = r['Date'];
+      const ts = new Date(dateStr).getTime();
+      if (score == null || isNaN(ts)) return;
+      if (!byEng[id]) byEng[id] = [];
+      byEng[id].push({ ts, score });
+    });
+  // Sort each engagement chronologically and return just the scores
+  const out = {};
+  Object.keys(byEng).forEach(id => {
+    byEng[id].sort((a, b) => a.ts - b.ts);
+    out[id] = byEng[id].map(x => x.score);
+  });
+  return out;
+}
+
+function mapPipeline(rows) {
+  return rows.filter(r => r['Opportunity ID'] || r['Client name']).map(r => ({
+    id: r['Opportunity ID'] || '',
+    client: r['Client name'] || '',
+    stage: r['Stage'] || '',
+    value: toNum(r['Value']) || 0,
+    prob: toPct(r['Probability %']) || 0,
+    closeDate: r['Expected close date'] || '',
+    owner: r['Owner'] || '',
+  }));
+}
+function mapQuotes(rows) {
+  return rows.filter(r => r['Quote ID']).map(r => {
+    const list = toNum(r['List price']) || 0;
+    const sold = toNum(r['Sold price']);
+    const quoted = toNum(r['Quoted price']);
+    return {
+      client: r['Client name'],
+      list,
+      sold: sold != null ? sold : (quoted || 0),
+      gmList: toPct(r['GM % at list']) || 0,
+      gmSold: toPct(r['GM % at sold']) || 0,
+      below: toBool(r['Below floor']),
+      status: r['Status'] || 'Sent',
+    };
+  });
+}
+function mapTeam(rows) {
+  return rows.filter(r => r['Name']).map(r => {
+    const cap = toNum(r['Capacity hrs/wk']) || 40;
+    const bill = toNum(r['Billable hrs this week']) || 0;
+    return { name: r['Name'], util: cap > 0 ? bill / cap : 0 };
+  });
+}
+function mapRisks(rows) {
+  return rows.filter(r => r['Risk ID'] && r['Status'] !== 'Closed').map(r => {
+    // Accept new "Type" column (Issues / Risks). Default to Risks if missing.
+    const raw = (r['Type'] || 'Risks').trim();
+    const type = (raw.toLowerCase() === 'issues') ? 'Issues' : 'Risks';
+    return { desc: r['Description'], eng: r['Engagement ID'], type };
+  });
+}
+function mapWins(rows) {
+  return rows.filter(r => r['Date']).map(r => {
+    const d = new Date(r['Date']);
+    const dateLabel = isNaN(d) ? '' : d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+    const attr = r['Type'] === 'Testimonial'
+      ? `${r['Client']} · ${r['Attribution'] || 'client'}`
+      : `${r['Type']} · ${dateLabel}`;
+    return { quote: r['Quote or detail'], attr };
+  }).slice(0, 8);
+}
+function mapHiring(rows) {
+  return rows.filter(r => r['Role']).map(r => ({
+    role: r['Role'],
+    stage: r['Stage'] || 'Open',
+    candidates: toNum(r['Candidates in pipeline']) || 0,
+    dateOpened: r['Date opened'] || '',
+  }));
+}
+function mapConfig(rows) {
+  const map = {};
+  rows.forEach(r => { if (r['Setting']) map[r['Setting']] = r['Value']; });
+  return {
+    refreshSeconds: toNum(map['Refresh interval seconds']) || 60,
+    gmTarget: toPct(map['GM target % (portfolio)']) || 0.55,
+    utilTarget: toPct(map['Utilisation target %']) || 0.75,
+    satAmber: toNum(map['Satisfaction amber threshold']) || 4,
+    satRed: toNum(map['Satisfaction red threshold']) || 3,
+    guestMode: toBool(map['Guest mode']),
+  };
+}
+
+// ============ FETCH LAYER ============
+async function fetchCSV(url) {
+  // Cache-buster on each request to defeat Google's edge cache
+  const sep = url.includes('?') ? '&' : '?';
+  const res = await fetch(url + sep + 't=' + Date.now(), { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return parseCSV(await res.text());
+}
+
+function setStatus(state, text) {
+  const el = document.getElementById('datastatus');
+  el.classList.remove('stale','error');
+  if (state) el.classList.add(state);
+  document.getElementById('datastatus-text').textContent = text;
+}
+
+async function fetchAll() {
+  const urls = SHEET_URLS;
+  const anyConfigured = Object.values(urls).some(u => u && u.length);
+  if (!anyConfigured) {
+    setStatus(null, 'LIVE');
+    return; // keep DUMMY_DATA in DATA
+  }
+  try {
+    const [engagementsRows, satisfactionRows, risksRows, pipelineRows, quotesRows, teamRows, hiringRows, winsRows, configRows] = await Promise.all([
+      urls.engagements  ? fetchCSV(urls.engagements)  : [],
+      urls.satisfaction ? fetchCSV(urls.satisfaction) : [],
+      urls.risks        ? fetchCSV(urls.risks)        : [],
+      urls.pipeline     ? fetchCSV(urls.pipeline)     : [],
+      urls.quotes       ? fetchCSV(urls.quotes)       : [],
+      urls.team         ? fetchCSV(urls.team)         : [],
+      urls.hiring       ? fetchCSV(urls.hiring)       : [],
+      urls.wins         ? fetchCSV(urls.wins)         : [],
+      urls.config       ? fetchCSV(urls.config)       : [],
+    ]);
+    if (configRows.length) CONFIG = mapConfig(configRows);
+    if (engagementsRows.length)  DATA.engagements  = mapEngagements(engagementsRows);
+    if (satisfactionRows.length) DATA.satisfaction = mapSatisfaction(satisfactionRows);
+    if (risksRows.length)        DATA.risks        = mapRisks(risksRows);
+    if (pipelineRows.length)     DATA.pipeline     = mapPipeline(pipelineRows);
+    if (quotesRows.length)       DATA.quotes       = mapQuotes(quotesRows);
+    else if (!urls.quotes)       DATA.quotes       = []; // Quotes tab not used — renderPricing falls back to engagement gmTarget
+    if (teamRows.length)         DATA.team         = mapTeam(teamRows);
+    if (hiringRows.length)       DATA.hiring       = mapHiring(hiringRows);
+    if (winsRows.length)         DATA.wins         = mapWins(winsRows);
+    const t = new Date();
+    const hh = String(t.getHours()).padStart(2,'0');
+    const mm = String(t.getMinutes()).padStart(2,'0');
+    setStatus(null, `LIVE · updated ${hh}:${mm}`);
+  } catch (err) {
+    console.error('Sheet fetch failed:', err);
+    setStatus('error', 'FETCH FAILED');
+  }
+}
+
+async function refreshAndRender() {
+  await fetchAll();
+  renderEngagements();
+  renderStats();
+  renderPricing();
+  renderUtil();
+  renderHiring();
+  renderRisks();
+  renderWins();
+  renderMarquee();
+}
+
+// ============ HELPERS ============
+const fmtMoney = v => {
+  if (v >= 1000000) return "$" + (v/1000000).toFixed(2) + "M";
+  if (v >= 1000) return "$" + Math.round(v/1000) + "k";
+  return "$" + Math.round(v);
+};
+const fmtPct = v => (v*100).toFixed(1) + "%";
+const fmtPctNoDec = v => Math.round(v*100) + "%";
+
+// ============ ENGAGEMENTS ============
+
+// ============ AUTO-SCROLL HELPER ============
+// Wraps inner content of a host element in a .scroll-track, duplicating it
+// for seamless looping. Only enables animation if content overflows.
+// `pxPerSecond` controls scroll speed (TV-friendly is 25-30).
+function setupScroll(hostId, trackClass, pxPerSecond = 25) {
+  const host = document.getElementById(hostId);
+  if (!host) return;
+  // If a track already wraps content, unwrap it back to flat children first
+  const existingTrack = host.querySelector(':scope > .scroll-track');
+  if (existingTrack) {
+    // Half the children are duplicates from the previous setup — discard them
+    const allChildren = Array.from(existingTrack.children);
+    const half = allChildren.length / 2;
+    const originals = allChildren.slice(0, half);
+    host.innerHTML = '';
+    originals.forEach(el => host.appendChild(el));
+    host.classList.remove('scrolling');
+  }
+  // Pull existing children
+  const items = Array.from(host.children);
+  if (!items.length) return;
+
+  // Build the track with two copies (original + duplicate) for seamless loop
+  const track = document.createElement('div');
+  track.className = `scroll-track ${trackClass}`;
+  items.forEach(el => track.appendChild(el));
+  // Duplicate
+  items.forEach(el => {
+    const clone = el.cloneNode(true);
+    track.appendChild(clone);
+  });
+
+  host.innerHTML = '';
+  host.appendChild(track);
+
+  // Measure: only scroll if original content (half the track) exceeds host height
+  requestAnimationFrame(() => {
+    const trackHeight = track.scrollHeight;
+    const halfHeight = trackHeight / 2;
+    const hostHeight = host.clientHeight;
+    if (halfHeight > hostHeight + 4) {
+      // Duration: time to scroll half the track (one full cycle of unique content)
+      const duration = halfHeight / pxPerSecond;
+      track.style.setProperty('--scroll-duration', duration + 's');
+      host.classList.add('scrolling');
+    } else {
+      host.classList.remove('scrolling');
+    }
+  });
+}
+
+
+function renderEngagements() {
+  const list = document.getElementById('eng-list');
+  list.classList.add('scroll-host');
+  list.innerHTML = '';
+  DATA.engagements.forEach(e => {
+    const ragClass = e.rag.toLowerCase();
+    const satAmber = CONFIG.satAmber || 4;
+    const satRed = CONFIG.satRed || 3;
+    const satClass = e.sat == null ? 'none' : (e.sat > satAmber ? 'green' : e.sat > satRed ? 'amber' : 'red');
+    const satLabel = e.sat == null ? '—' : e.sat;
+    const sarBadge = e.sar ? '<span class="cell-mark cell-mark-sar">Y</span>' : '<span class="cell-blank">—</span>';
+    const crBadge = `<span class="cell-num ${e.crCount > 0 ? 'has' : ''}">${e.crCount}</span>`;
+    const masked = e.confidential && CONFIG.guestMode;
+    const clientName = masked ? '████████████' : e.client;
+    const row = `
+      <div class="eng-row ${masked ? 'confidential' : ''}">
+        <div class="rag-pill ${ragClass}"></div>
+        <div class="eng-info">
+          <div class="eng-line1">
+            <span class="eng-client">${e.prog}</span>
+          </div>
+          <div class="eng-prog">${clientName} · ${e.pm}</div>
+        </div>
+        ${sarBadge}
+        ${crBadge}
+        <div class="eng-week">Wk <strong>${e.currentWeek}</strong>/${e.weeks}</div>
+        <div class="eng-sat ${satClass}">${satLabel}</div>
+      </div>`;
+    list.insertAdjacentHTML('beforeend', row);
+  });
+  setupScroll('eng-list', 'eng-track', 28);
+  const sar = DATA.engagements.filter(e => e.sar).length;
+  const red = DATA.engagements.filter(e => e.rag === 'Red').length;
+  const amber = DATA.engagements.filter(e => e.rag === 'Amber').length;
+  const green = DATA.engagements.filter(e => e.rag === 'Green').length;
+  const crTotal = DATA.engagements.reduce((s,e) => s + e.crCount, 0);
+  document.getElementById('eng-summary').innerHTML =
+    `<strong class="green">${green}G</strong> · <strong class="amber">${amber}A</strong> · <strong class="red">${red}R</strong> · <strong class="sar">${sar} SAR</strong> · <strong>${crTotal} CRs</strong>`;
+}
+
+// ============ HEADLINE STATS ============
+function renderStats() {
+  const totalContract = DATA.engagements.filter(e => e.status === 'Active').reduce((s,e) => s + e.contract, 0);
+  const totalDelivered = DATA.engagements.filter(e => e.status === 'Active').reduce((s,e) => s + e.delivered, 0);
+  document.getElementById('stat-rum').textContent = fmtMoney(totalContract);
+  document.getElementById('stat-rum-sub').textContent = fmtMoney(totalDelivered) + ' delivered (' + Math.round(totalDelivered/totalContract*100) + '%)';
+
+  const weightedGM = DATA.engagements.filter(e => e.status === 'Active')
+    .reduce((s,e) => s + e.gmActual * e.contract, 0) / totalContract;
+  const gmEl = document.getElementById('stat-gm');
+  gmEl.textContent = fmtPct(weightedGM);
+  gmEl.style.color = weightedGM >= 0.55 ? 'var(--code-green)' : weightedGM >= 0.50 ? 'var(--amber)' : 'var(--red)';
+  const gmTarget = CONFIG.gmTarget || 0.55;
+  const gmDelta = (weightedGM - gmTarget) * 100;
+  const gmSub = document.getElementById('stat-gm-sub');
+  gmSub.textContent = (gmDelta >= 0 ? '+' : '') + gmDelta.toFixed(1) + 'pts vs target ' + Math.round(gmTarget*100) + '%';
+  gmSub.className = 'stat-sub ' + (gmDelta >= 0 ? 'green' : 'red');
+
+  // Portfolio CSAT: average of latest scores across active engagements (skip those with no score)
+  const satAmber = CONFIG.satAmber || 4;
+  const satRed = CONFIG.satRed || 3;
+  const activeWithSat = DATA.engagements.filter(e => e.status === 'Active' && e.sat != null);
+  const csatEl = document.getElementById('stat-csat');
+  const csatSubEl = document.getElementById('stat-csat-sub');
+  if (activeWithSat.length === 0) {
+    csatEl.textContent = '—';
+    csatSubEl.textContent = 'no scores captured';
+    csatEl.style.color = 'var(--grey-300)';
+  } else {
+    const avg = activeWithSat.reduce((s, e) => s + e.sat, 0) / activeWithSat.length;
+    csatEl.textContent = avg.toFixed(1) + '/7';
+    csatEl.style.color = avg > satAmber ? 'var(--code-green)' : avg > satRed ? 'var(--amber)' : 'var(--red)';
+    const atRisk = activeWithSat.filter(e => e.sat <= satAmber).length;
+    csatSubEl.textContent = atRisk > 0
+      ? `${atRisk} engagement${atRisk === 1 ? '' : 's'} ≤${satAmber}`
+      : `${activeWithSat.length} engagement${activeWithSat.length === 1 ? '' : 's'} scored`;
+  }
+
+  // Productive Utilisation: team avg billable hrs / capacity
+  const utilTarget = CONFIG.utilTarget || 0.75;
+  const team = DATA.team || [];
+  const utilEl = document.getElementById('stat-util');
+  const utilSubEl = document.getElementById('stat-util-sub');
+  if (team.length === 0) {
+    utilEl.textContent = '—';
+    utilSubEl.textContent = 'no team data';
+    utilEl.style.color = 'var(--grey-300)';
+  } else {
+    const avgUtil = team.reduce((s, t) => s + (t.util || 0), 0) / team.length;
+    utilEl.textContent = Math.round(avgUtil * 100) + '%';
+    // Green if at/above target, amber if within 10pts, red if further below
+    const deltaToTarget = avgUtil - utilTarget;
+    if (deltaToTarget >= 0) utilEl.style.color = 'var(--code-green)';
+    else if (deltaToTarget >= -0.10) utilEl.style.color = 'var(--amber)';
+    else utilEl.style.color = 'var(--red)';
+    const below = team.filter(t => t.util < utilTarget).length;
+    const targetPct = Math.round(utilTarget * 100);
+    utilSubEl.textContent = below > 0
+      ? `${below} of ${team.length} below ${targetPct}%`
+      : `all ${team.length} at or above ${targetPct}%`;
+  }
+}
+
+// ============ PRICING ============
+function renderPricing() {
+  // Per-engagement margin slippage view
+  // Match each active engagement to its Won quote (by client name) to get GM at sold
+  const quoteByClient = {};
+  DATA.quotes.forEach(q => {
+    if (q.status === 'Won') quoteByClient[q.client] = q;
+  });
+
+  const rows = DATA.engagements
+    .filter(e => e.status === 'Active')
+    .map(e => {
+      const q = quoteByClient[e.client];
+      // Fallback to engagement's GM target if no matching quote
+      const gmSold = q ? q.gmSold : e.gmTarget;
+      const gmActual = e.gmActual;
+      const slippage = gmSold - gmActual; // positive = losing margin in delivery
+      const early = e.currentWeek != null && e.currentWeek < 3;
+      const masked = e.confidential && CONFIG.guestMode;
+      return {
+        client: masked ? '████████████' : e.client,
+        id: e.id,
+        gmSold, gmActual, slippage, early,
+      };
+    })
+    .sort((a, b) => b.slippage - a.slippage);
+
+  // Bar scale: each row's bars represent GM% on a fixed 0-70% scale so they're comparable
+  const SCALE = 0.70;
+  const html = rows.map(r => {
+    const soldW = Math.min(100, (r.gmSold / SCALE) * 100);
+    const actualW = Math.min(100, (r.gmActual / SCALE) * 100);
+    const slipPts = r.slippage * 100;
+    let slipClass = '';
+    if (slipPts >= 8) slipClass = 'heavy';
+    else if (slipPts <= 2) slipClass = 'low';
+    // Bar colour reflects engagement health: green = at/above sold GM, amber = slipping <5pts, red = ≥5pts
+    let gmClass;
+    if (slipPts <= 0) gmClass = 'green';
+    else if (slipPts < 5) gmClass = 'amber';
+    else gmClass = 'red';
+    const slipLabel = (slipPts >= 0 ? '−' : '+') + Math.abs(slipPts).toFixed(1) + ' pts';
+    const earlyTag = r.early ? '<span class="early-tag">EARLY</span>' : '';
+    const belowfloor = slipPts >= 10; // 10+ pts of slippage flagged
+    return `<div class="pricing-row ${belowfloor ? 'belowfloor' : ''}">
+      <div class="pricing-row-head">
+        <span class="pricing-client">${r.client} ${earlyTag}</span>
+        <span class="pricing-discount ${slipClass}">${slipLabel}</span>
+      </div>
+      <div class="pricing-bars">
+        <div class="pricing-list-bar" style="width:${soldW}%"></div>
+        <div class="pricing-sold-bar ${gmClass}" style="width:${actualW}%"></div>
+      </div>
+      <div class="pricing-footnote">
+        <span>sold ${(r.gmSold*100).toFixed(0)}%</span>
+        <span>actual ${(r.gmActual*100).toFixed(0)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+  const pricingTarget = document.getElementById('pricing');
+  pricingTarget.classList.add('scroll-host');
+  pricingTarget.innerHTML = html;
+  setupScroll('pricing', 'pricing-track', 25);
+
+  // Portfolio rollup: weight by contract value across active engagements
+  const active = DATA.engagements.filter(e => e.status === 'Active');
+  const totalContract = active.reduce((s, e) => s + e.contract, 0);
+  const wgmSold = active.reduce((s, e) => {
+    const q = quoteByClient[e.client];
+    const gmSold = q ? q.gmSold : e.gmTarget;
+    return s + gmSold * e.contract;
+  }, 0) / totalContract;
+  const wgmActual = active.reduce((s, e) => s + e.gmActual * e.contract, 0) / totalContract;
+  document.getElementById('gm-list').textContent = fmtPct(wgmSold);
+  document.getElementById('gm-sold').textContent = fmtPct(wgmActual);
+  const delta = (wgmSold - wgmActual) * 100;
+  const deltaEl = document.getElementById('gm-delta');
+  if (delta > 0) {
+    deltaEl.textContent = '−' + delta.toFixed(1) + ' pts margin slippage in delivery';
+    deltaEl.style.background = 'rgba(255,176,32,0.08)';
+    deltaEl.style.borderColor = 'rgba(255,176,32,0.2)';
+    deltaEl.style.color = 'var(--amber)';
+  } else {
+    deltaEl.textContent = '+' + Math.abs(delta).toFixed(1) + ' pts above sold GM in delivery';
+    deltaEl.style.background = 'rgba(0,214,122,0.08)';
+    deltaEl.style.borderColor = 'rgba(0,214,122,0.2)';
+    deltaEl.style.color = 'var(--code-green)';
+  }
+}
+
+// ============ UTILISATION ============
+function renderUtil() {
+  const target = CONFIG.utilTarget || 0.75;
+  const targetPct = Math.round(target * 100);
+  document.getElementById('util-target-label').textContent = targetPct + '%';
+  const html = DATA.team.map(t => {
+    // Bands: low (>10pts below target = red), watch (within 10pts below = amber),
+    // healthy (at/above target = green), over (≥100% = amber/red, burning out)
+    let cls;
+    if (t.util >= 1.00) cls = 'over';
+    else if (t.util >= target) cls = 'healthy';
+    else if (t.util >= target - 0.10) cls = 'watch';
+    else cls = 'low';
+    const pct = Math.round(t.util * 100);
+    return `<div class="util-row">
+      <div class="util-name">${t.name}</div>
+      <div class="util-bar">
+        <div class="util-fill ${cls}" style="width:${pct}%"></div>
+        <div class="util-target" style="left:${targetPct}%"></div>
+      </div>
+      <div class="util-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('util-list').innerHTML = html;
+}
+
+// ============ HIRING ============
+function renderHiring() {
+  const target = document.getElementById('hiring-list');
+  if (!target) return;
+  const stageOrder = { 'Offer': 0, 'Interviewing': 1, 'Screening': 2, 'Open': 3, 'Hired': 4 };
+  const sorted = [...(DATA.hiring || [])].sort((a, b) => {
+    return (stageOrder[a.stage] ?? 9) - (stageOrder[b.stage] ?? 9);
+  });
+
+  if (sorted.length === 0) {
+    target.innerHTML = '<div style="text-align:center; padding:24px; color:var(--grey-500); font-size:12px;">No open roles</div>';
+    document.getElementById('hiring-summary').textContent = '';
+    return;
+  }
+
+  const html = sorted.map(h => {
+    const stageCls = h.stage.toLowerCase().replace(/\s+/g, '');
+    return `<div class="hiring-row">
+      <div class="hiring-role">${h.role}</div>
+      <span class="hiring-stage ${stageCls}">${h.stage}</span>
+      <div class="hiring-meta">
+        <div><strong>${h.candidates}</strong></div>
+        <div class="hiring-meta-label">in pipeline</div>
+      </div>
+    </div>`;
+  }).join('');
+  target.innerHTML = html;
+
+  // Summary: counts at most advanced stages
+  const inOffer = sorted.filter(h => h.stage === 'Offer').length;
+  const interviewing = sorted.filter(h => h.stage === 'Interviewing').length;
+  const totalOpen = sorted.filter(h => h.stage !== 'Hired').length;
+  const summary = document.getElementById('hiring-summary');
+  if (summary) {
+    summary.innerHTML = `<strong>${totalOpen}</strong> open · <strong class="amber">${interviewing}</strong> interviewing · <strong class="green">${inOffer}</strong> at offer`;
+  }
+}
+
+// ============ WATCH LIST (Issues / Risks) ============
+function renderRisks() {
+  // Issues (red, more urgent) sort above Risks (amber, watching)
+  const order = { 'Issues': 0, 'Risks': 1 };
+  const sorted = [...DATA.risks].sort((a, b) => (order[a.type] ?? 9) - (order[b.type] ?? 9));
+  const engById = {};
+  DATA.engagements.forEach(e => { engById[e.id] = e; });
+  const html = sorted.map(r => {
+    const cls = r.type === 'Issues' ? 'issues' : 'risks';
+    const eng = engById[r.eng];
+    let label;
+    if (eng) {
+      const masked = eng.confidential && CONFIG.guestMode;
+      const client = masked ? '████████████' : eng.client;
+      label = `${client} · ${eng.prog}`;
+    } else {
+      label = r.eng;
+    }
+    return `<div class="risk-row">
+      <div class="risk-pill ${cls}"></div>
+      <div class="risk-info">
+        <div class="risk-desc">${r.desc}</div>
+        <div class="risk-eng">${label}</div>
+      </div>
+      <div class="risk-sev ${cls}">${r.type === 'Issues' ? 'Issue' : 'Risk'}</div>
+    </div>`;
+  }).join('');
+  const target = document.getElementById('risk-list');
+  target.classList.add('scroll-host');
+  target.innerHTML = html;
+  setupScroll('risk-list', 'risk-track', 25);
+  const issuesCount = DATA.risks.filter(r => r.type === 'Issues').length;
+  const risksCount = DATA.risks.filter(r => r.type === 'Risks').length;
+  document.getElementById('risks-summary').innerHTML =
+    `<strong class="red">${issuesCount} issues</strong> · <strong class="amber">${risksCount} risks</strong>`;
+}
+
+// ============ WINS ROTATOR ============
+let winIdx = 0;
+function renderWins() {
+  const target = document.getElementById('wins');
+  if (!target) return; // wins panel not on screen in this layout
+  const html = DATA.wins.map((w, i) => `
+    <div class="win-card ${i === 0 ? 'active' : ''}" data-idx="${i}">
+      <div class="win-quote">"${w.quote}"</div>
+      <div class="win-attr">— ${w.attr}</div>
+    </div>`).join('');
+  target.innerHTML = html;
+}
+function rotateWins() {
+  const cards = document.querySelectorAll('.win-card');
+  if (!cards.length) return;
+  cards.forEach(c => c.classList.remove('active'));
+  winIdx = (winIdx + 1) % cards.length;
+  cards[winIdx].classList.add('active');
+}
+
+// ============ NOW STRIP ============
+function renderMarquee() {
+  const items = [];
+
+  // Stage priority: Committed first (most imminent), then Business Validation
+  const stageOrder = { 'Committed': 0, 'Business Validation': 1 };
+  const stageTag = {
+    'Committed': '<span class="tag green-tag">COMMITTED</span>',
+    'Business Validation': '<span class="tag bv-tag">BUSINESS VALIDATION</span>',
+  };
+
+  const upcoming = (DATA.pipeline || [])
+    .filter(p => p.stage === 'Committed' || p.stage === 'Business Validation')
+    .sort((a, b) => {
+      const so = (stageOrder[a.stage] ?? 9) - (stageOrder[b.stage] ?? 9);
+      if (so !== 0) return so;
+      // Within same stage, soonest close first (kept for ordering; date not displayed)
+      const ad = new Date(a.closeDate).getTime() || Infinity;
+      const bd = new Date(b.closeDate).getTime() || Infinity;
+      return ad - bd;
+    });
+
+  if (upcoming.length === 0) {
+    items.push(`<span class="marquee-item"><span class="tag">UPCOMING</span>No projects in Business Validation or Committed stages</span>`);
+  } else {
+    upcoming.forEach(p => {
+      const tag = stageTag[p.stage] || `<span class="tag">${p.stage.toUpperCase()}</span>`;
+      items.push(`<span class="marquee-item">${tag}${p.client}</span>`);
+    });
+  }
+
+  // Duplicate so the loop is seamless
+  const inner = items.concat(items).join('');
+  document.getElementById('marquee').innerHTML = inner;
+}
+
+function tick() {
+  const now = new Date();
+  const opts = { weekday:'short', day:'2-digit', month:'short', year:'numeric' };
+  document.getElementById('topdate').textContent = now.toLocaleDateString('en-GB', opts).toUpperCase();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
+  const onejan = new Date(now.getFullYear(),0,1);
+  const week = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+  document.getElementById('weeknum').textContent = `WEEK ${week}`;
+}
+
+// ============ INIT ============
+let refreshTimer = null;
+async function start() {
+  await refreshAndRender();
+  // Schedule next refresh based on Config tab; default 60s
+  if (refreshTimer) clearInterval(refreshTimer);
+  const interval = (CONFIG.refreshSeconds || 60) * 1000;
+  refreshTimer = setInterval(refreshAndRender, interval);
+}
+
+// ============ VIEW ROTATOR ============
+const VIEW_INTERVAL_MS = 20000; // 20 seconds per view
+const viewOrder = ['delivery', 'commercial', 'team'];
+let currentViewIdx = 0;
+function rotateView() {
+  currentViewIdx = (currentViewIdx + 1) % viewOrder.length;
+  const next = viewOrder[currentViewIdx];
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.toggle('active', v.dataset.view === next);
+  });
+  document.querySelectorAll('.view-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.dot === next);
+  });
+  // Restart auto-scroll on newly visible panels so they begin from the top
+  if (next === 'delivery') {
+    setupScroll('eng-list', 'eng-track', 28);
+    setupScroll('risk-list', 'risk-track', 25);
+  } else if (next === 'commercial') {
+    setupScroll('pricing', 'pricing-track', 25);
+  }
+}
+
+start();
+tick();
+setInterval(tick, 1000);
+setInterval(rotateWins, 5000);
+setInterval(rotateView, VIEW_INTERVAL_MS);
+</script>
+</body>
+</html>
