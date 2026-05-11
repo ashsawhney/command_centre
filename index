@@ -941,16 +941,16 @@
 // so you can preview the layout offline.
 // ============================================================
 const SHEET_URLS = {
-  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=432388555&single=true",  // Engagements tab CSV URL
+  engagements:  "",  // Engagements tab CSV URL
   satisfaction: "",  // Satisfaction History tab CSV URL
-  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=376784636&single=true",  // Risks tab CSV URL
-  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=1663914395&single=true",  // Pipeline tab CSV URL
+  risks:        "",  // Risks tab CSV URL
+  pipeline:     "",  // Pipeline tab CSV URL
   quotes:       "",  // Quotes tab CSV URL
-  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=469293141&single=true",  // Team tab CSV URL
-  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=1040895288&single=true",  // Hiring tab CSV URL
+  team:         "",  // Team tab CSV URL
+  hiring:       "",  // Hiring tab CSV URL
   wins:         "",  // Wins tab CSV URL
-  crs:          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=473917190&single=true",  // CRs tab CSV URL
-  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pubhtml?gid=173671514&single=true",  // Config tab CSV URL
+  crs:          "",  // CRs tab CSV URL
+  config:       "",  // Config tab CSV URL
 };
 
 // ============ FALLBACK DUMMY DATA (used in test mode) ============
