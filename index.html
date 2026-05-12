@@ -636,7 +636,7 @@
   .util-list { display: flex; flex-direction: column; gap: 5px; flex: 1; min-height: 0; overflow: hidden; padding-right: 4px; }
   .util-row {
     display: grid;
-    grid-template-columns: 70px 1fr 36px;
+    grid-template-columns: 100px 1fr 36px;
     align-items: center; gap: 8px;
     font-size: 11px;
   }
@@ -1033,16 +1033,16 @@ setInterval(applyThemeForCurrentTime, 60 * 1000);
 // so you can preview the layout offline.
 // ============================================================
 const SHEET_URLS = {
-  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=1855089301&single=true&output=csv",  // Engagements tab CSV URL
+  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1855089301&single=true&output=csv",  // Engagements tab CSV URL
   satisfaction: "",  // Satisfaction History tab CSV URL
-  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=36715550&single=true&output=csv",  // Risks tab CSV URL
-  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=59105128&single=true&output=csv",  // Pipeline tab CSV URL
+  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=36715550&single=true&output=csv",  // Risks tab CSV URL
+  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=59105128&single=true&output=csv",  // Pipeline tab CSV URL
   quotes:       "",  // Quotes tab CSV URL
-  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=570052608&single=true&output=csv",  // Team tab CSV URL
-  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=612492520&single=true&output=csv",  // Hiring tab CSV URL
+  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=570052608&single=true&output=csv",  // Team tab CSV URL
+  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=612492520&single=true&output=csv",  // Hiring tab CSV URL
   wins:         "",  // Wins tab CSV URL
   crs:          "",  // CRs tab CSV URL
-  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=1646236368&single=true&output=csv",  // Config tab CSV URL
+  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1646236368&single=true&output=csv",  // Config tab CSV URL
 };
 
 // ============ FALLBACK DUMMY DATA (used in test mode) ============
