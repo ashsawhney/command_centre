@@ -457,7 +457,7 @@
   /* ================ HEADLINE STATS ================ */
   .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     padding: 0;
     background: transparent;
@@ -640,7 +640,7 @@
     align-items: center; gap: 8px;
     font-size: 11px;
   }
-  .util-name { color: var(--grey-100); }
+  .util-name { color: var(--grey-100); font-weight: 600; }
   .util-bar {
     height: 6px; border-radius: 2px;
     background: rgba(255,255,255,0.04);
@@ -876,7 +876,12 @@
     <!-- Headline stats (always visible) -->
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Revenue Under Mgmt</div>
+        <div class="stat-label">List Revenue Under Mgmt</div>
+        <div class="stat-value" id="stat-rum-list">—</div>
+        <div class="stat-sub">pre-discount</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Discounted Revenue Under Mgmt</div>
         <div class="stat-value" id="stat-rum">—</div>
         <div class="stat-sub" id="stat-rum-sub">delivered to date</div>
       </div>
@@ -1529,7 +1534,9 @@ function renderEngagements() {
 // ============ HEADLINE STATS ============
 function renderStats() {
   const totalContract = DATA.engagements.filter(e => e.status === 'Active').reduce((s,e) => s + e.contract, 0);
+  const totalList     = DATA.engagements.filter(e => e.status === 'Active').reduce((s,e) => s + (e.list || 0), 0);
   const totalDelivered = DATA.engagements.filter(e => e.status === 'Active').reduce((s,e) => s + e.delivered, 0);
+  document.getElementById('stat-rum-list').textContent = fmtMoney(totalList);
   document.getElementById('stat-rum').textContent = fmtMoney(totalContract);
   document.getElementById('stat-rum-sub').textContent = fmtMoney(totalDelivered) + ' delivered (' + Math.round(totalDelivered/totalContract*100) + '%)';
 
@@ -1622,21 +1629,23 @@ function renderPricing() {
     const soldW = Math.min(100, (r.gmSold / SCALE) * 100);
     const actualW = Math.min(100, (r.gmActual / SCALE) * 100);
     const slipPts = r.slippage * 100;
-    let slipClass = '';
-    if (slipPts >= 8) slipClass = 'heavy';
-    else if (slipPts <= 2) slipClass = 'low';
-    // Bar colour reflects engagement health: green = at/above sold GM, amber = slipping <5pts, red = ≥5pts
+    // Unified colour rule: bar and label always agree.
+    //   slippage = 0 pts or actual above sold  → green (label says +X or −0.0)
+    //   slippage = 0 to 5 pts                  → amber
+    //   slippage > 5 pts                       → red
     let gmClass;
     if (slipPts <= 0) gmClass = 'green';
-    else if (slipPts < 5) gmClass = 'amber';
+    else if (slipPts <= 5) gmClass = 'amber';
     else gmClass = 'red';
+    // Same class drives both the label text colour and the bar fill
+    const labelClass = gmClass === 'green' ? 'low' : gmClass === 'red' ? 'heavy' : '';
     const slipLabel = (slipPts >= 0 ? '−' : '+') + Math.abs(slipPts).toFixed(1) + ' pts';
     const earlyTag = r.early ? '<span class="early-tag">EARLY</span>' : '';
     const belowfloor = slipPts >= 10; // 10+ pts of slippage flagged
     return `<div class="pricing-row ${belowfloor ? 'belowfloor' : ''}">
       <div class="pricing-row-head">
         <span class="pricing-client">${r.client} ${earlyTag}</span>
-        <span class="pricing-discount ${slipClass}">${slipLabel}</span>
+        <span class="pricing-discount ${labelClass}">${slipLabel}</span>
       </div>
       <div class="pricing-bars">
         <div class="pricing-list-bar" style="width:${soldW}%"></div>
