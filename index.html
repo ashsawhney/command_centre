@@ -31,6 +31,84 @@
     --glow-red: 0 0 28px rgba(255,61,90,0.4);
   }
 
+  /* ================ LIGHT THEME OVERRIDES ================
+     Activated by adding .theme-light to <body> (done by JS based on time of day).
+     Same variable names, light-mode values — the rest of the stylesheet picks them up. */
+  body.theme-light {
+    --space-black: #f4f5f7;
+    --space-deep:  #ffffff;
+    --space-mid:   #eef0f4;
+    --space-elev:  #e3e6ed;
+    --safety-blue-soft: #3d63d4;
+    --code-green: #10b981;        /* vivid emerald, readable on white */
+    --code-green-soft: #34d399;
+    --amber: #f59e0b;             /* true amber, recognisable from across the room */
+    --red: #ef4444;               /* vivid red */
+    --white: #0a0e1a;       /* "ink" colour on light surfaces */
+    --grey-100: #1f2433;
+    --grey-300: #5d6478;
+    --grey-500: #8b91a3;
+    --grey-700: #c9ccd6;
+    --border: rgba(10,14,26,0.08);
+    --border-strong: rgba(10,14,26,0.16);
+    --glow-blue: 0 0 12px rgba(27,77,255,0.18);
+    --glow-green: 0 0 12px rgba(16,185,129,0.20);
+    --glow-red: 0 0 14px rgba(239,68,68,0.22);
+  }
+  /* Hardcoded rgba surfaces that escape the variable system — explicit light overrides. */
+  body.theme-light .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,249,251,0.95) 100%);
+  }
+  body.theme-light .stat {
+    background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,249,251,0.95) 100%);
+  }
+  body.theme-light .eng-row {
+    background: rgba(255,255,255,0.65);
+  }
+  body.theme-light .risk-row,
+  body.theme-light .hiring-row {
+    background: rgba(255,255,255,0.65);
+  }
+  body.theme-light .gm-card-lg {
+    background: rgba(255,255,255,0.95);
+  }
+  body.theme-light .pricing-bars {
+    background: rgba(10,14,26,0.05);
+  }
+  body.theme-light .pricing-list-bar {
+    background: rgba(10,14,26,0.12);
+  }
+  /* Body background gradient softened in light mode */
+  body.theme-light {
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(27,77,255,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 100%, rgba(4,120,87,0.03) 0%, transparent 50%),
+      var(--space-deep);
+  }
+  /* Grid lines inverted */
+  /* Grid lines — hide in light mode (they look like actual gridlines on white) */
+  body.theme-light::before {
+    background-image: none;
+  }
+  /* Glows that look out of place in light mode */
+  body.theme-light .rag-pill,
+  body.theme-light .live-dot,
+  body.theme-light .risk-pill {
+    box-shadow: none;
+  }
+  /* Bar gradient endpoints — slight darken on each, no longer "drop to brown" */
+  body.theme-light .util-fill.watch         { background: linear-gradient(90deg, var(--amber) 0%, #d97706 100%); }
+  body.theme-light .util-fill.low           { background: linear-gradient(90deg, var(--red) 0%, #dc2626 100%); }
+  body.theme-light .util-fill.healthy       { background: linear-gradient(90deg, var(--code-green) 0%, #059669 100%); }
+  body.theme-light .pricing-sold-bar.green  { background: linear-gradient(90deg, var(--code-green) 0%, #059669 100%); }
+  body.theme-light .pricing-sold-bar.amber  { background: linear-gradient(90deg, var(--amber) 0%, #d97706 100%); }
+  body.theme-light .pricing-sold-bar.red    { background: linear-gradient(90deg, var(--red) 0%, #dc2626 100%); }
+  body.theme-light .pricing-row.belowfloor .pricing-sold-bar {
+    background: linear-gradient(90deg, var(--red) 0%, #b91c1c 100%);
+  }
+  /* Opus logo: dark mode inverts (black SVG → appears white); light mode shows native black */
+  body.theme-light .opus-logo img.invert { filter: none; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
@@ -270,6 +348,8 @@
   .scroll-track.eng-track > * + * { margin-top: 8px; }
   .scroll-track.risk-track > * + * { margin-top: 6px; }
   .scroll-track.pricing-track > * + * { margin-top: 8px; }
+  .scroll-track.util-track > * + * { margin-top: 5px; }
+  .scroll-track.hiring-track > * + * { margin-top: 8px; }
   .scroll-host.scrolling .scroll-track {
     animation: scroll-loop var(--scroll-duration, 40s) linear infinite;
   }
@@ -427,12 +507,11 @@
     min-height: 0;
   }
   .comm-section-grow .pricing-list {
-    overflow-y: auto;
+    overflow: hidden;
     flex: 1;
+    min-height: 0;
     padding-right: 4px;
   }
-  .comm-section-grow .pricing-list::-webkit-scrollbar { width: 6px; }
-  .comm-section-grow .pricing-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
   .comm-head {
     font-family: 'Prompt', sans-serif;
     font-size: 10px; font-weight: 600;
@@ -554,9 +633,7 @@
   }
 
   /* ================ UTILISATION ================ */
-  .util-list { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; padding-right: 4px; }
-  .util-list::-webkit-scrollbar { width: 6px; }
-  .util-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  .util-list { display: flex; flex-direction: column; gap: 5px; flex: 1; min-height: 0; overflow: hidden; padding-right: 4px; }
   .util-row {
     display: grid;
     grid-template-columns: 70px 1fr 36px;
@@ -596,11 +673,10 @@
     display: flex; flex-direction: column;
     gap: 8px;
     flex: 1;
-    overflow-y: auto;
+    min-height: 0;
+    overflow: hidden;
     padding-right: 4px;
   }
-  .hiring-list::-webkit-scrollbar { width: 6px; }
-  .hiring-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
   .hiring-row {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -928,6 +1004,21 @@
 
 <script>
 // ============================================================
+// TIME-OF-DAY THEME SWITCHER
+// Light theme between 08:00 and 18:00 local time; dark theme otherwise.
+// Re-evaluated every minute so the dashboard switches automatically across the day.
+// ============================================================
+function applyThemeForCurrentTime() {
+  const hour = new Date().getHours();
+  const isDay = hour >= 8 && hour < 18;
+  document.body.classList.toggle('theme-light', isDay);
+}
+// Apply immediately on load so first paint matches the time of day
+applyThemeForCurrentTime();
+// Then re-check every minute (cheap; just a class toggle)
+setInterval(applyThemeForCurrentTime, 60 * 1000);
+
+// ============================================================
 // CONFIGURATION — paste your published Google Sheet CSV URLs here
 // ============================================================
 // HOW TO GET THESE:
@@ -942,16 +1033,16 @@
 // so you can preview the layout offline.
 // ============================================================
 const SHEET_URLS = {
-  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1855089301&single=true&output=csv",  // Engagements tab CSV URL
+  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=1855089301&single=true&output=csv",  // Engagements tab CSV URL
   satisfaction: "",  // Satisfaction History tab CSV URL
-  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=36715550&single=true&output=csv",  // Risks tab CSV URL
-  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=59105128&single=true&output=csv",  // Pipeline tab CSV URL
+  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=36715550&single=true&output=csv",  // Risks tab CSV URL
+  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=59105128&single=true&output=csv",  // Pipeline tab CSV URL
   quotes:       "",  // Quotes tab CSV URL
-  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=570052608&single=true&output=csv",  // Team tab CSV URL
-  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=612492520&single=true&output=csv",  // Hiring tab CSV URL
+  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=570052608&single=true&output=csv",  // Team tab CSV URL
+  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=612492520&single=true&output=csv",  // Hiring tab CSV URL
   wins:         "",  // Wins tab CSV URL
   crs:          "",  // CRs tab CSV URL
-  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1646236368&single=true&output=csv",  // Config tab CSV URL
+  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaT16hNnJuQ81wOTdnzD69Knq4hhpjaapnVzrXZLvq9WFLpheVshRusLR-PNDTW1r3AoYxo014pZRe/pub?gid=1646236368&single=true&output=csv",  // Config tab CSV URL
 };
 
 // ============ FALLBACK DUMMY DATA (used in test mode) ============
@@ -1344,37 +1435,54 @@ function setupScroll(hostId, trackClass, pxPerSecond = 25) {
     originals.forEach(el => host.appendChild(el));
     host.classList.remove('scrolling');
   }
-  // Pull existing children
+  // Pull existing children — these are the originals
   const items = Array.from(host.children);
   if (!items.length) return;
 
-  // Build the track with two copies (original + duplicate) for seamless loop
-  const track = document.createElement('div');
-  track.className = `scroll-track ${trackClass}`;
-  items.forEach(el => track.appendChild(el));
-  // Duplicate
-  items.forEach(el => {
-    const clone = el.cloneNode(true);
-    track.appendChild(clone);
-  });
+  // Measure content vs host height. Only build the duplicated scroll track if content
+  // actually overflows — otherwise leave the flat list alone (no visible duplication).
+  // Retries handle the case where layout/fonts haven't settled (e.g. hidden views).
+  const measureAndApply = () => {
+    // Compute the content height by summing the original items
+    let contentHeight = 0;
+    items.forEach(el => { contentHeight += el.offsetHeight; });
+    // Add gaps between items if any (read from computed style)
+    const styles = window.getComputedStyle(host);
+    const gap = parseFloat(styles.rowGap || styles.gap) || 0;
+    if (items.length > 1) contentHeight += gap * (items.length - 1);
 
-  host.innerHTML = '';
-  host.appendChild(track);
-
-  // Measure: only scroll if original content (half the track) exceeds host height
-  requestAnimationFrame(() => {
-    const trackHeight = track.scrollHeight;
-    const halfHeight = trackHeight / 2;
     const hostHeight = host.clientHeight;
-    if (halfHeight > hostHeight + 4) {
-      // Duration: time to scroll half the track (one full cycle of unique content)
+    const overflows = contentHeight > hostHeight + 4;
+    const alreadyScrolling = host.classList.contains('scrolling');
+
+    if (overflows && !alreadyScrolling) {
+      // Build the duplicated track now
+      const track = document.createElement('div');
+      track.className = `scroll-track ${trackClass}`;
+      items.forEach(el => track.appendChild(el));
+      items.forEach(el => track.appendChild(el.cloneNode(true)));
+      host.innerHTML = '';
+      host.appendChild(track);
+      const halfHeight = track.scrollHeight / 2;
       const duration = halfHeight / pxPerSecond;
       track.style.setProperty('--scroll-duration', duration + 's');
       host.classList.add('scrolling');
-    } else {
+    } else if (!overflows && alreadyScrolling) {
+      // Was scrolling, no longer needs to — unwrap back to flat list
+      const track = host.querySelector(':scope > .scroll-track');
+      if (track) {
+        const allChildren = Array.from(track.children);
+        const half = allChildren.length / 2;
+        const originals = allChildren.slice(0, half);
+        host.innerHTML = '';
+        originals.forEach(el => host.appendChild(el));
+      }
       host.classList.remove('scrolling');
     }
-  });
+  };
+  requestAnimationFrame(measureAndApply);
+  setTimeout(measureAndApply, 400);
+  setTimeout(measureAndApply, 1200);
 }
 
 
@@ -1594,7 +1702,10 @@ function renderUtil() {
       <div class="util-pct">${pct}%</div>
     </div>`;
   }).join('');
-  document.getElementById('util-list').innerHTML = html;
+  const utilTarget = document.getElementById('util-list');
+  utilTarget.classList.add('scroll-host');
+  utilTarget.innerHTML = html;
+  setupScroll('util-list', 'util-track', 22);
 }
 
 // ============ HIRING ============
@@ -1623,7 +1734,9 @@ function renderHiring() {
       </div>
     </div>`;
   }).join('');
+  target.classList.add('scroll-host');
   target.innerHTML = html;
+  setupScroll('hiring-list', 'hiring-track', 20);
 
   // Summary: counts at most advanced stages
   const inOffer = sorted.filter(h => h.stage === 'Offer').length;
@@ -1770,6 +1883,9 @@ function rotateView() {
     setupScroll('risk-list', 'risk-track', 25);
   } else if (next === 'commercial') {
     setupScroll('pricing', 'pricing-track', 25);
+  } else if (next === 'team') {
+    setupScroll('util-list', 'util-track', 22);
+    setupScroll('hiring-list', 'hiring-track', 20);
   }
 }
 
