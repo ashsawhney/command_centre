@@ -98,6 +98,7 @@
     border-right: 1px solid var(--border-strong);
   }
   .opus-logo img, .opus-logo svg { height: 28px; width: auto; display: block; }
+  .opus-logo img.invert { filter: invert(1) brightness(1.1); }
   .top-title {
     font-family: 'Prompt', sans-serif;
     font-weight: 400; font-size: 15px;
@@ -781,7 +782,7 @@
   <div class="topbar">
     <div class="top-centre">
       <!-- Empty Opus logo slot — replace contents with <img src="..."/> or inline SVG to use the real logo -->
-      <div class="opus-logo" id="opus-logo"></div>
+      <div class="opus-logo" id="opus-logo"><img src="https://www.opus.com/images/opus-wordmark-navbar-black.svg" alt="Opus" class="invert"></div>
       <div class="top-title">Solutions Delivery <strong>Command Centre</strong></div>
     </div>
     <div class="top-meta">
@@ -941,30 +942,30 @@
 // so you can preview the layout offline.
 // ============================================================
 const SHEET_URLS = {
-  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=432388555&single=true&output=csv",  // Engagements tab CSV URL
+  engagements:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1855089301&single=true&output=csv",  // Engagements tab CSV URL
   satisfaction: "",  // Satisfaction History tab CSV URL
-  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=376784636&single=true&output=csv",  // Risks tab CSV URL
-  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=1663914395&single=true&output=csv",  // Pipeline tab CSV URL
+  risks:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=36715550&single=true&output=csv",  // Risks tab CSV URL
+  pipeline:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=59105128&single=true&output=csv",  // Pipeline tab CSV URL
   quotes:       "",  // Quotes tab CSV URL
-  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=469293141&single=true&output=csv",  // Team tab CSV URL
-  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=1040895288&single=true&output=csv",  // Hiring tab CSV URL
+  team:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=570052608&single=true&output=csv",  // Team tab CSV URL
+  hiring:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=612492520&single=true&output=csv",  // Hiring tab CSV URL
   wins:         "",  // Wins tab CSV URL
-  crs:          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=473917190&single=true&output=csv",  // CRs tab CSV URL
-  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNyUOsjbGwlDi7l-zFb6VTvYs459OwooRAPWekC3xwlYiqIE83xCs7jnrywN30T7tQFmUno8J2GKhj/pub?gid=173671514&single=true&output=csv",  // Config tab CSV URL
+  crs:          "",  // CRs tab CSV URL
+  config:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQt4nlT9-WGtg0vylyETYNKIYhGNGMwrqxXsIxx43UjLO6pF9MHZY8uKDTNYGYRbA/pub?gid=1646236368&single=true&output=csv",  // Config tab CSV URL
 };
 
 // ============ FALLBACK DUMMY DATA (used in test mode) ============
 const DUMMY_DATA = {
   engagements: [
-    {id:"WAY-2026-Q2", client:"Wayne Industries", prog:"Operational Excellence Programme", status:"Active", startDate:"2026-04-06", endDate:"2026-08-31", weeks:21, rag:"Green", sar:false, msPlanned:15, msDone:3, sat:7, contract:920000, list:980000, delivered:180000, gmTarget:0.60, gmActual:0.61, pm:"Marcus", confidential:false, crCount:1, crValue:60000, currentWeek:5},
-    {id:"GLX-2026-Q1", client:"Globex Energy", prog:"ERP Migration Discovery", status:"Active", startDate:"2026-03-23", endDate:"2026-06-15", weeks:12, rag:"Green", sar:false, msPlanned:9, msDone:5, sat:7, contract:680000, list:720000, delivered:420000, gmTarget:0.56, gmActual:0.58, pm:"Priya", confidential:false, crCount:1, crValue:30000, currentWeek:7},
-    {id:"SAL-2026-Q1", client:"Salama", prog:"Business Process Discovery", status:"Active", startDate:"2026-03-02", endDate:"2026-05-04", weeks:9, rag:"Green", sar:false, msPlanned:12, msDone:7, sat:6, contract:450000, list:500000, delivered:280000, gmTarget:0.55, gmActual:0.52, pm:"Ash", confidential:false, crCount:3, crValue:73000, currentWeek:10},
-    {id:"STK-2026-Q2", client:"Stark Holdings", prog:"Supply Chain Discovery", status:"Active", startDate:"2026-04-27", endDate:"2026-07-06", weeks:10, rag:"Green", sar:false, msPlanned:10, msDone:1, sat:null, contract:410000, list:440000, delivered:40000, gmTarget:0.57, gmActual:0.55, pm:"Priya", confidential:false, crCount:0, crValue:0, currentWeek:2},
-    {id:"ACME-2026-Q2", client:"Acme Holdings", prog:"Process Automation Pilot", status:"Active", startDate:"2026-04-13", endDate:"2026-07-13", weeks:13, rag:"Amber", sar:true, msPlanned:8, msDone:2, sat:4, contract:280000, list:320000, delivered:90000, gmTarget:0.58, gmActual:0.49, pm:"Priya", confidential:false, crCount:1, crValue:0, currentWeek:4},
-    {id:"INT-2026-Q1", client:"Initech", prog:"Finance Ops Mapping", status:"Active", startDate:"2026-01-19", endDate:"2026-04-13", weeks:12, rag:"Amber", sar:true, msPlanned:6, msDone:5, sat:5, contract:310000, list:340000, delivered:290000, gmTarget:0.55, gmActual:0.50, pm:"Ash", confidential:false, crCount:1, crValue:22000, currentWeek:16},
-    {id:"TRL-2026-Q1", client:"Trillian Logistics", prog:"Warehouse Ops Mapping", status:"Active", startDate:"2026-03-16", endDate:"2026-06-08", weeks:12, rag:"Amber", sar:false, msPlanned:8, msDone:4, sat:5, contract:290000, list:310000, delivered:160000, gmTarget:0.56, gmActual:0.52, pm:"Ash", confidential:false, crCount:1, crValue:0, currentWeek:8},
-    {id:"NRT-2026-Q1", client:"Northern Trust Co.", prog:"Risk Ops Discovery", status:"Active", startDate:"2026-02-09", endDate:"2026-04-20", weeks:10, rag:"Red", sar:false, msPlanned:10, msDone:5, sat:3, contract:520000, list:560000, delivered:320000, gmTarget:0.55, gmActual:0.41, pm:"Ash", confidential:true, crCount:2, crValue:80000, currentWeek:13},
-    {id:"UMB-2026-Q1", client:"Umbrella Pharma", prog:"Compliance Process Audit", status:"Active", startDate:"2026-02-23", endDate:"2026-05-25", weeks:13, rag:"Red", sar:true, msPlanned:8, msDone:4, sat:2, contract:360000, list:400000, delivered:200000, gmTarget:0.55, gmActual:0.38, pm:"Marcus", confidential:true, crCount:3, crValue:95000, currentWeek:11},
+    {id:"Operational Excellence Programme", client:"Wayne Industries", prog:"Operational Excellence Programme", status:"Active", startDate:"2026-04-06", endDate:"2026-08-31", weeks:21, rag:"Green", sar:false, msPlanned:15, msDone:3, sat:7, contract:920000, list:980000, delivered:180000, gmTarget:0.60, gmActual:0.61, pm:"Marcus", confidential:false, crCount:1, crValue:60000, currentWeek:5},
+    {id:"ERP Migration Discovery", client:"Globex Energy", prog:"ERP Migration Discovery", status:"Active", startDate:"2026-03-23", endDate:"2026-06-15", weeks:12, rag:"Green", sar:false, msPlanned:9, msDone:5, sat:7, contract:680000, list:720000, delivered:420000, gmTarget:0.56, gmActual:0.58, pm:"Priya", confidential:false, crCount:1, crValue:30000, currentWeek:7},
+    {id:"Business Process Discovery", client:"Salama", prog:"Business Process Discovery", status:"Active", startDate:"2026-03-02", endDate:"2026-05-04", weeks:9, rag:"Green", sar:false, msPlanned:12, msDone:7, sat:6, contract:450000, list:500000, delivered:280000, gmTarget:0.55, gmActual:0.52, pm:"Ash", confidential:false, crCount:3, crValue:73000, currentWeek:10},
+    {id:"Supply Chain Discovery", client:"Stark Holdings", prog:"Supply Chain Discovery", status:"Active", startDate:"2026-04-27", endDate:"2026-07-06", weeks:10, rag:"Green", sar:false, msPlanned:10, msDone:1, sat:null, contract:410000, list:440000, delivered:40000, gmTarget:0.57, gmActual:0.55, pm:"Priya", confidential:false, crCount:0, crValue:0, currentWeek:2},
+    {id:"Process Automation Pilot", client:"Acme Holdings", prog:"Process Automation Pilot", status:"Active", startDate:"2026-04-13", endDate:"2026-07-13", weeks:13, rag:"Amber", sar:true, msPlanned:8, msDone:2, sat:4, contract:280000, list:320000, delivered:90000, gmTarget:0.58, gmActual:0.49, pm:"Priya", confidential:false, crCount:1, crValue:0, currentWeek:4},
+    {id:"Finance Ops Mapping", client:"Initech", prog:"Finance Ops Mapping", status:"Active", startDate:"2026-01-19", endDate:"2026-04-13", weeks:12, rag:"Amber", sar:true, msPlanned:6, msDone:5, sat:5, contract:310000, list:340000, delivered:290000, gmTarget:0.55, gmActual:0.50, pm:"Ash", confidential:false, crCount:1, crValue:22000, currentWeek:16},
+    {id:"Warehouse Ops Mapping", client:"Trillian Logistics", prog:"Warehouse Ops Mapping", status:"Active", startDate:"2026-03-16", endDate:"2026-06-08", weeks:12, rag:"Amber", sar:false, msPlanned:8, msDone:4, sat:5, contract:290000, list:310000, delivered:160000, gmTarget:0.56, gmActual:0.52, pm:"Ash", confidential:false, crCount:1, crValue:0, currentWeek:8},
+    {id:"Risk Ops Discovery", client:"Northern Trust Co.", prog:"Risk Ops Discovery", status:"Active", startDate:"2026-02-09", endDate:"2026-04-20", weeks:10, rag:"Red", sar:false, msPlanned:10, msDone:5, sat:3, contract:520000, list:560000, delivered:320000, gmTarget:0.55, gmActual:0.41, pm:"Ash", confidential:true, crCount:2, crValue:80000, currentWeek:13},
+    {id:"Compliance Process Audit", client:"Umbrella Pharma", prog:"Compliance Process Audit", status:"Active", startDate:"2026-02-23", endDate:"2026-05-25", weeks:13, rag:"Red", sar:true, msPlanned:8, msDone:4, sat:2, contract:360000, list:400000, delivered:200000, gmTarget:0.55, gmActual:0.38, pm:"Marcus", confidential:true, crCount:3, crValue:95000, currentWeek:11},
   ],
   pipeline: [
     {id:"OPP-301", client:"Cyberdyne Systems",  stage:"Business Validation", value:420000, prob:0.30, closeDate:"2026-08-15", owner:"Ash"},
@@ -1005,18 +1006,18 @@ const DUMMY_DATA = {
     {name:"Yara",   util:0.54},
   ],
   risks: [
-    {desc:"Regulatory scope expansion threatens margin on Umbrella audit", eng:"UMB-2026-Q1", type:"Issues"},
-    {desc:"Client decision-making cycle delaying milestones", eng:"NRT-2026-Q1", type:"Issues"},
-    {desc:"Audit findings may trigger CR-driven rework", eng:"UMB-2026-Q1", type:"Issues"},
-    {desc:"Scope ambiguity around legacy ERP integration", eng:"ACME-2026-Q2", type:"Issues"},
-    {desc:"CFO transition leaving sponsor gap", eng:"INT-2026-Q1", type:"Issues"},
-    {desc:"Replan timeline at risk if exec sign-off slips", eng:"NRT-2026-Q1", type:"Issues"},
-    {desc:"Two dept leads on leave, interview backlog growing", eng:"TRL-2026-Q1", type:"Risks"},
-    {desc:"Late provision of process documentation", eng:"ACME-2026-Q2", type:"Risks"},
-    {desc:"Stream 4 resourcing not yet confirmed", eng:"WAY-2026-Q2", type:"Risks"},
-    {desc:"Dept 4 SME availability limited next 2 weeks", eng:"SAL-2026-Q1", type:"Risks"},
-    {desc:"Data access controls slowing process mapping", eng:"SAL-2026-Q1", type:"Risks"},
-    {desc:"Travel disruption could affect dept 4 onsite", eng:"GLX-2026-Q1", type:"Risks"},
+    {desc:"Regulatory scope expansion threatens margin on Umbrella audit", eng:"Compliance Process Audit", type:"Issues"},
+    {desc:"Client decision-making cycle delaying milestones", eng:"Risk Ops Discovery", type:"Issues"},
+    {desc:"Audit findings may trigger CR-driven rework", eng:"Compliance Process Audit", type:"Issues"},
+    {desc:"Scope ambiguity around legacy ERP integration", eng:"Process Automation Pilot", type:"Issues"},
+    {desc:"CFO transition leaving sponsor gap", eng:"Finance Ops Mapping", type:"Issues"},
+    {desc:"Replan timeline at risk if exec sign-off slips", eng:"Risk Ops Discovery", type:"Issues"},
+    {desc:"Two dept leads on leave, interview backlog growing", eng:"Warehouse Ops Mapping", type:"Risks"},
+    {desc:"Late provision of process documentation", eng:"Process Automation Pilot", type:"Risks"},
+    {desc:"Stream 4 resourcing not yet confirmed", eng:"Operational Excellence Programme", type:"Risks"},
+    {desc:"Dept 4 SME availability limited next 2 weeks", eng:"Business Process Discovery", type:"Risks"},
+    {desc:"Data access controls slowing process mapping", eng:"Business Process Discovery", type:"Risks"},
+    {desc:"Travel disruption could affect dept 4 onsite", eng:"ERP Migration Discovery", type:"Risks"},
   ],
   wins: [
     {quote:"Best-structured discovery I've seen in 15 years of consulting engagements.", attr:"Globex Energy · sponsor"},
@@ -1120,10 +1121,11 @@ const weeksSince = start => {
 
 // ============ MAPPERS — sheet rows → DATA shape ============
 function mapEngagements(rows) {
-  return rows.filter(r => r['Engagement ID']).map(r => {
+  // Programme name is now the foreign key (was Engagement ID).
+  return rows.filter(r => r['Programme name']).map(r => {
     const start = r['Start date'], end = r['End date'];
     return {
-      id: r['Engagement ID'],
+      id: r['Programme name'],  // legacy field name kept for downstream use; value is now programme name
       client: r['Client name'],
       prog: r['Programme name'],
       status: r['Status'],
@@ -1171,14 +1173,15 @@ function mapSatisfaction(rows) {
 }
 
 function mapPipeline(rows) {
-  return rows.filter(r => r['Opportunity ID'] || r['Client name']).map(r => ({
-    id: r['Opportunity ID'] || '',
+  // Slim schema: just Client name + Stage. No id, value, probability, close date, owner.
+  return rows.filter(r => r['Client name']).map(r => ({
+    id: '',
     client: r['Client name'] || '',
     stage: r['Stage'] || '',
-    value: toNum(r['Value']) || 0,
-    prob: toPct(r['Probability %']) || 0,
-    closeDate: r['Expected close date'] || '',
-    owner: r['Owner'] || '',
+    value: 0,
+    prob: 0,
+    closeDate: '',
+    owner: '',
   }));
 }
 function mapQuotes(rows) {
@@ -1205,11 +1208,12 @@ function mapTeam(rows) {
   });
 }
 function mapRisks(rows) {
-  return rows.filter(r => r['Risk ID'] && r['Status'] !== 'Closed').map(r => {
-    // Accept new "Type" column (Issues / Risks). Default to Risks if missing.
+  // Slim schema: Programme name (foreign key), Description, Type.
+  return rows.filter(r => r['Description']).map(r => {
     const raw = (r['Type'] || 'Risks').trim();
     const type = (raw.toLowerCase() === 'issues') ? 'Issues' : 'Risks';
-    return { desc: r['Description'], eng: r['Engagement ID'], type };
+    // eng holds the programme name now (was Engagement ID)
+    return { desc: r['Description'], eng: r['Programme name'], type };
   });
 }
 function mapWins(rows) {
@@ -1223,11 +1227,12 @@ function mapWins(rows) {
   }).slice(0, 8);
 }
 function mapHiring(rows) {
+  // Slim schema: Role, Stage, Candidates in pipeline. No Date opened.
   return rows.filter(r => r['Role']).map(r => ({
     role: r['Role'],
     stage: r['Stage'] || 'Open',
     candidates: toNum(r['Candidates in pipeline']) || 0,
-    dateOpened: r['Date opened'] || '',
+    dateOpened: '',
   }));
 }
 function mapConfig(rows) {
