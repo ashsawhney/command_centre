@@ -152,7 +152,7 @@
   /* ================ TOP BAR ================ */
   .topbar {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 24px;
     padding: 0 22px;
@@ -162,9 +162,14 @@
     box-shadow: 0 0 0 1px rgba(27,77,255,0.15) inset;
   }
 
-  .top-centre {
+  .top-left {
     display: flex; align-items: center; justify-content: flex-start;
-    gap: 0;
+  }
+  .top-centre {
+    display: flex; align-items: center; justify-content: center;
+  }
+  .top-meta {
+    justify-self: end;
   }
   .opus-logo {
     display: flex; align-items: center;
@@ -179,7 +184,7 @@
   .opus-logo img.invert { filter: invert(1) brightness(1.1); }
   .top-title {
     font-family: 'Prompt', sans-serif;
-    font-weight: 400; font-size: 15px;
+    font-weight: 400; font-size: 17px;
     letter-spacing: 2.5px; text-transform: uppercase;
     color: var(--grey-300);
   }
@@ -192,7 +197,7 @@
   .top-meta {
     display: flex; align-items: center; gap: 22px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; color: var(--grey-100);
+    font-size: 14px; color: var(--grey-100);
   }
   .top-meta .live {
     display: flex; align-items: center; gap: 8px;
@@ -390,7 +395,7 @@
   }
   .eng-client {
     font-family: 'Prompt', sans-serif;
-    font-weight: 600; font-size: 16px;
+    font-weight: 600; font-size: 18px;
     color: var(--white);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -400,7 +405,7 @@
     color: var(--grey-500);
   }
   .eng-prog {
-    font-size: 12px; color: var(--grey-300);
+    font-size: 13px; color: var(--grey-300);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
@@ -431,11 +436,11 @@
     color: var(--grey-300);
     text-align: center;
   }
-  .eng-week strong { color: var(--white); font-size: 13px; }
+  .eng-week strong { color: var(--white); font-size: 14px; }
 
   .eng-sat {
     font-family: 'Prompt', sans-serif;
-    font-weight: 600; font-size: 16px;
+    font-weight: 600; font-size: 18px;
     text-align: center;
   }
   .eng-sat.green { color: var(--code-green); }
@@ -445,7 +450,7 @@
 
   .cell-mark, .cell-num, .cell-blank {
     font-family: 'Prompt', sans-serif;
-    font-weight: 600; font-size: 16px;
+    font-weight: 600; font-size: 18px;
     text-align: center;
     justify-self: center;
   }
@@ -476,14 +481,14 @@
   }
   .stat-label {
     font-family: 'Prompt', sans-serif;
-    font-size: 10px; font-weight: 500;
+    font-size: 11px; font-weight: 500;
     letter-spacing: 2px; text-transform: uppercase;
     color: var(--grey-300);
     margin-bottom: 8px;
   }
   .stat-value {
     font-family: 'Prompt', sans-serif;
-    font-weight: 700; font-size: 28px;
+    font-weight: 700; font-size: 32px;
     line-height: 1;
     color: var(--white);
   }
@@ -521,14 +526,14 @@
   }
 
   .pricing-list { display: flex; flex-direction: column; gap: 8px; }
-  .pricing-row { font-size: 12px; }
+  .pricing-row { font-size: 13px; }
   .pricing-row-head {
     display: flex; justify-content: space-between;
     margin-bottom: 4px;
   }
   .pricing-client {
     color: var(--white); font-weight: 600;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 180px;
   }
@@ -690,7 +695,7 @@
   .hiring-role {
     font-family: 'Prompt', sans-serif;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--white);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -714,7 +719,7 @@
     text-align: right;
     min-width: 50px;
   }
-  .hiring-meta strong { color: var(--white); font-size: 13px; }
+  .hiring-meta strong { color: var(--white); font-size: 14px; }
   .hiring-meta-label {
     font-size: 9px;
     color: var(--grey-500);
@@ -744,8 +749,8 @@
   .risk-pill.risks  { background: var(--amber); box-shadow: 0 0 6px rgba(255,176,32,0.45); }
   .risk-info { min-width: 0; }
   .risk-desc {
-    font-size: 11px; color: var(--white);
-    line-height: 1.3;
+    font-size: 12px; color: var(--white);
+    line-height: 1.35;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -856,9 +861,11 @@
 
   <!-- ============ TOP BAR ============ -->
   <div class="topbar">
-    <div class="top-centre">
+    <div class="top-left">
       <!-- Empty Opus logo slot — replace contents with <img src="..."/> or inline SVG to use the real logo -->
       <div class="opus-logo" id="opus-logo"><img src="https://www.opus.com/images/opus-wordmark-navbar-black.svg" alt="Opus" class="invert"></div>
+    </div>
+    <div class="top-centre">
       <div class="top-title">Solutions Delivery <strong>Command Centre</strong></div>
     </div>
     <div class="top-meta">
